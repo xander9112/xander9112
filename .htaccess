@@ -1,0 +1,12 @@
+Options -Indexes
+ErrorDocument 404 /404.php
+
+Options +FollowSymLinks
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !index.php$
+
+RewriteRule ^([^/]*)$ /templates/$1.php [QSA,L,NC]

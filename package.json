@@ -1,0 +1,28 @@
+{
+  "name": "AlexZander",
+  "email" : "xander9112@gmail.com",
+  "version": "1.0.0",
+  "description": "AlexZander Utils",
+  "license": "(MIT)",
+  "dependencies": {
+    "del": "^1.2.1",
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^2.3.1",
+    "gulp-babel": "^5.2.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-csso": "^1.0.0",
+    "gulp-if": "^1.2.5",
+    "gulp-imagemin": "^2.4.0",
+    "gulp-less": "^3.0.3",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.4.1",
+    "gulp.spritesmith": "^4.0.0",
+    "imagemin-pngquant": "^4.2.0",
+    "require-dir": "^0.3.0",
+    "yargs": "^3.24.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
