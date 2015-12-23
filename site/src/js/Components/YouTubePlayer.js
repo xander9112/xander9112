@@ -1,6 +1,6 @@
 var $$ = $$ || {};
 
-$$.YouTubePlayer = class YouTubePlayer {
+$$.YouTube = class YouTube {
 	constructor (root, options) {
 		this.root = root;
 
@@ -70,7 +70,9 @@ $$.YouTubePlayer = class YouTubePlayer {
 		});
 
 		this.root.on('PlayerCreated', () => {
+		});
 
+		this.root.on('PlayerStateChange', (event, data) => {
 		});
 	}
 
@@ -83,7 +85,7 @@ $$.YouTubePlayer = class YouTubePlayer {
 					this.root.trigger('PlayerCreated');
 				},
 				'onStateChange': (event) => {
-					this.onPlayerStateChange(event);
+					this.root.trigger('PlayerStateChange', event);
 				}
 			}
 		};
@@ -91,6 +93,24 @@ $$.YouTubePlayer = class YouTubePlayer {
 		_.assign(playerOptions, this.options);
 
 		this.player = new YT.Player(this.root.get(0), playerOptions);
+	}
+
+	onPlayerStateChange (event) {
+		if (event.data == YT.PlayerState.PLAYING) {
+		}
+	}
+
+
+	_ready () {
+		"use strict";
+	}
+};
+
+$$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
+	constructor (root, options) {
+		"use strict";
+
+		super(root, options)
 	}
 
 	set mute (isMute) {
@@ -110,7 +130,6 @@ $$.YouTubePlayer = class YouTubePlayer {
 
 	get volume () {
 		"use strict";
-		console.log(this.player.getVolume());
 		return this.player.getVolume();
 	}
 
@@ -127,11 +146,40 @@ $$.YouTubePlayer = class YouTubePlayer {
 		this.player.setVolume(volume);
 	}
 
-	onPlayerStateChange (event) {
-		if (event.data == YT.PlayerState.PLAYING) {
-		}
+	set size (size) {
+		"use strict";
+
+		this.player.setSize(size.width, size.height);
 	}
 
+	/**
+	 * Возвращает состояние проигрывателя. Возможные значения:
+	 * @returns
+	 * -1 – воспроизведение видео не началось
+	 * 0 – воспроизведение видео завершено
+	 * 1 – воспроизведение
+	 * 2 – пауза
+	 * 3 – буферизация
+	 * 5 – видео находится в очереди
+	 */
+
+	get playerState () {
+		"use strict";
+
+		return this.player.getPlayerState()
+	}
+
+	get CurrentTime () {
+		"use strict";
+
+		return this.player.getCurrentTime();
+	}
+
+	get duration () {
+		"use strict";
+
+		return this.player.getDuration();
+	}
 
 	playVideo () {
 		"use strict";
@@ -146,9 +194,5 @@ $$.YouTubePlayer = class YouTubePlayer {
 	stopVideo () {
 		"use strict";
 		this.player.stopVideo();
-	}
-
-	_ready () {
-		"use strict";
 	}
 };

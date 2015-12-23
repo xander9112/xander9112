@@ -538,42 +538,6 @@ $$.getRandomInt = function (min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-$$.Transitions = {
-	linear: function linear(t) {
-		return t;
-	},
-
-	quadIn: function quadIn(t) {
-		return t * t;
-	},
-
-	quadInOut: function quadInOut(t) {
-		t *= 2;
-
-		if (t < 1) {
-			return 0.5 * t * t;
-		}
-
-		return -0.5 * ((t - 1) * (t - 3) - 1);
-	},
-
-	quadOut: function quadOut(t) {
-		return -t * (t - 2);
-	},
-
-	sineIn: function sineIn(t) {
-		return 1 - Math.cos(t * Math.PI * 0.5);
-	},
-
-	sineInOut: function sineInOut(t) {
-		return 0.5 - 0.5 * Math.cos(t * Math.PI);
-	},
-
-	sineOut: function sineOut(t) {
-		return Math.sin(t * Math.PI * 0.5);
-	}
-};
-
 $$.makeVideoPlayerHtml = function (videoType, videoId, width, height) {
 	if (videoType == 'youtube') {
 		return '<iframe class="youtube-player" type="text/html"' + ' width="' + width + '" height="' + height + '" src="' + 'http://www.youtube.com/embed/' + videoId + '?autoplay=0&rel=0&amp;controls=0&amp;showinfo=0' + '" frameborder="0" wmode="opaque" autoplay="false"></iframe>';
@@ -681,6 +645,27 @@ $$.getVideoID = function (url) {
 		id = url;
 	}
 	return id;
+};
+
+$$.secondsToTime = function (seconds) {
+	"use strict";
+
+	var allTime = seconds;
+	var minutes = parseInt(seconds / 60);
+	var sec = parseInt(seconds - minutes * 60);
+
+	if (minutes < 10) {
+		minutes = '0' + minutes;
+	}
+
+	if (sec < 10) {
+		sec = '0' + sec;
+	}
+
+	return {
+		minutes: minutes,
+		sec: sec
+	};
 };
 "use strict";
 
@@ -1058,15 +1043,19 @@ $$.MercatorProjection = (function () {
 })();
 'use strict';
 
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var $$ = $$ || {};
 
-$$.YouTubePlayer = (function () {
-	function YouTubePlayer(root, options) {
-		_classCallCheck(this, YouTubePlayer);
+$$.YouTube = (function () {
+	function YouTube(root, options) {
+		_classCallCheck(this, YouTube);
 
 		this.root = root;
 
@@ -1101,7 +1090,7 @@ $$.YouTubePlayer = (function () {
   * @private
   */
 
-	_createClass(YouTubePlayer, [{
+	_createClass(YouTube, [{
 		key: '_createScript',
 		value: function _createScript() {
 			"use strict";
@@ -1144,6 +1133,8 @@ $$.YouTubePlayer = (function () {
 			});
 
 			this.root.on('PlayerCreated', function () {});
+
+			this.root.on('PlayerStateChange', function (event, data) {});
 		}
 	}, {
 		key: '_createPlayer',
@@ -1158,7 +1149,7 @@ $$.YouTubePlayer = (function () {
 						_this3.root.trigger('PlayerCreated');
 					},
 					'onStateChange': function onStateChange(event) {
-						_this3.onPlayerStateChange(event);
+						_this3.root.trigger('PlayerStateChange', event);
 					}
 				}
 			};
@@ -1168,15 +1159,36 @@ $$.YouTubePlayer = (function () {
 			this.player = new YT.Player(this.root.get(0), playerOptions);
 		}
 	}, {
+		key: 'onPlayerStateChange',
+		value: function onPlayerStateChange(event) {
+			if (event.data == YT.PlayerState.PLAYING) {}
+		}
+	}, {
+		key: '_ready',
+		value: function _ready() {
+			"use strict";
+		}
+	}]);
+
+	return YouTube;
+})();
+
+$$.YouTubePlayer = (function (_$$$YouTube) {
+	_inherits(YouTubePlayer, _$$$YouTube);
+
+	function YouTubePlayer(root, options) {
+		"use strict";
+
+		_classCallCheck(this, YouTubePlayer);
+
+		_get(Object.getPrototypeOf(YouTubePlayer.prototype), 'constructor', this).call(this, root, options);
+	}
+
+	_createClass(YouTubePlayer, [{
 		key: 'isMuted',
 		value: function isMuted() {
 			"use strict";
 			return this.player.isMuted();
-		}
-	}, {
-		key: 'onPlayerStateChange',
-		value: function onPlayerStateChange(event) {
-			if (event.data == YT.PlayerState.PLAYING) {}
 		}
 	}, {
 		key: 'playVideo',
@@ -1197,11 +1209,6 @@ $$.YouTubePlayer = (function () {
 			this.player.stopVideo();
 		}
 	}, {
-		key: '_ready',
-		value: function _ready() {
-			"use strict";
-		}
-	}, {
 		key: 'mute',
 		set: function set(isMute) {
 			"use strict";
@@ -1216,7 +1223,6 @@ $$.YouTubePlayer = (function () {
 		key: 'volume',
 		get: function get() {
 			"use strict";
-			console.log(this.player.getVolume());
 			return this.player.getVolume();
 		},
 		set: function set(volume) {
@@ -1231,10 +1237,50 @@ $$.YouTubePlayer = (function () {
 
 			this.player.setVolume(volume);
 		}
+	}, {
+		key: 'size',
+		set: function set(size) {
+			"use strict";
+
+			this.player.setSize(size.width, size.height);
+		}
+
+		/**
+   * Возвращает состояние проигрывателя. Возможные значения:
+   * @returns
+   * -1 – воспроизведение видео не началось
+   * 0 – воспроизведение видео завершено
+   * 1 – воспроизведение
+   * 2 – пауза
+   * 3 – буферизация
+   * 5 – видео находится в очереди
+   */
+
+	}, {
+		key: 'playerState',
+		get: function get() {
+			"use strict";
+
+			return this.player.getPlayerState();
+		}
+	}, {
+		key: 'CurrentTime',
+		get: function get() {
+			"use strict";
+
+			return this.player.getCurrentTime();
+		}
+	}, {
+		key: 'duration',
+		get: function get() {
+			"use strict";
+
+			return this.player.getDuration();
+		}
 	}]);
 
 	return YouTubePlayer;
-})();
+})($$.YouTube);
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -1340,6 +1386,35 @@ var Application = (function () {
 
 				player.root.on('PlayerCreated', function () {
 					dimmer.removeClass('active');
+
+					$('.js-progress-time').progress({
+						percent: 0
+					});
+
+					var interval = null;
+
+					var allTime = $$.secondsToTime(player.duration);
+
+					$('.js-all-time').text(allTime.minutes + ':' + allTime.sec);
+
+					player.root.on('PlayerStateChange', function () {
+
+						if (player.playerState === 1) {
+							interval = setInterval(function () {
+								var currentTime = parseInt(player.CurrentTime);
+								var duration = parseInt(player.duration);
+
+								var allTime = $$.secondsToTime(player.CurrentTime);
+								$('.js-current-time').text(allTime.minutes + ':' + allTime.sec);
+
+								$('.js-progress-time').progress({
+									percent: parseInt(currentTime / duration * 100)
+								});
+							}, 1000);
+						} else {
+							clearInterval(interval);
+						}
+					});
 
 					form.on('click', '.js-play', function (event) {
 						event.preventDefault();

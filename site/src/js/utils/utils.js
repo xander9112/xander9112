@@ -42,42 +42,6 @@ $$.getRandomInt = function (min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-$$.Transitions = {
-	linear: function (t) {
-		return t;
-	},
-
-	quadIn: function (t) {
-		return t * t;
-	},
-
-	quadInOut: function (t) {
-		t *= 2;
-
-		if (t < 1) {
-			return 0.5 * t * t;
-		}
-
-		return -0.5 * ((t - 1) * (t - 3) - 1);
-	},
-
-	quadOut: function (t) {
-		return -t * (t - 2);
-	},
-
-	sineIn: function (t) {
-		return 1 - Math.cos(t * Math.PI * 0.5);
-	},
-
-	sineInOut: function (t) {
-		return 0.5 - 0.5 * Math.cos(t * Math.PI);
-	},
-
-	sineOut: function (t) {
-		return Math.sin(t * Math.PI * 0.5);
-	}
-};
-
 $$.makeVideoPlayerHtml = function (videoType, videoId, width, height) {
 	if (videoType == 'youtube') {
 		return '<iframe class="youtube-player" type="text/html"'
@@ -190,4 +154,25 @@ $$.getVideoID = function (url) {
 		id = url;
 	}
 	return id;
+};
+
+$$.secondsToTime = function (seconds) {
+	"use strict";
+
+	let allTime = seconds;
+	let minutes = parseInt(seconds / 60);
+	let sec = parseInt(seconds - (minutes * 60));
+
+	if (minutes < 10) {
+		minutes = `0${minutes}`
+	}
+
+	if (sec < 10) {
+		sec = `0${sec}`
+	}
+
+	return {
+		minutes: minutes,
+		sec:     sec
+	};
 };

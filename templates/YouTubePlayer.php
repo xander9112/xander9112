@@ -4,15 +4,30 @@
             <div class="ui loader"></div>
         </div>
         <div class="row">
-            <div class="column">
+            <div class="sixteen wide column">
                 <div class="embed-responsive embed-responsive-16by9">
                     <div class="embed-responsive-item js-youtube-player" data-id="M7lc1UVf-VE"></div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="column">
+            <div class="sixteen wide column">
                 <form class="ui form js-form-video">
+                    <div class="fields">
+                        <div class="thirteen wide field">
+                            <div class="ui indicating progress js-progress-time">
+                                <div class="bar">
+                                    <div class="progress"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="three wide field">
+                            <div class="ui label">
+                                <i class="wait icon"></i> <span class="js-current-time">00:00</span>
+                            </div>
+                            <div class="ui label">
+                                <i class="wait icon"></i> <span class="js-all-time">00:00</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="fields">
                         <div class="four wide field">
                             <button class="ui icon button js-play">

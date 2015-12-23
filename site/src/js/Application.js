@@ -93,6 +93,37 @@ class Application {
 			player.root.on('PlayerCreated', function () {
 				dimmer.removeClass('active');
 
+				$('.js-progress-time').progress({
+					percent: 0
+				});
+
+				var interval = null;
+
+				let allTime = $$.secondsToTime(player.duration);
+
+				$('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
+
+				player.root.on('PlayerStateChange', function () {
+
+					if (player.playerState === 1) {
+						interval = setInterval(() => {
+							let currentTime = parseInt(player.CurrentTime);
+							let duration = parseInt(player.duration);
+
+							let allTime = $$.secondsToTime(player.CurrentTime);
+							$('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
+
+							$('.js-progress-time').progress({
+								percent: parseInt(((currentTime / duration) * 100))
+							});
+						}, 1000);
+					} else {
+						clearInterval(interval);
+					}
+
+
+				});
+
 				form.on('click', '.js-play', function (event) {
 					event.preventDefault();
 					player.playVideo();
