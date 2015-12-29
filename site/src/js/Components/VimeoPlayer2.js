@@ -1,6 +1,6 @@
 var $$ = $$ || {};
 
-$$.VimeoPlayer = class VimeoPlayer {
+$$.VimeoPlayer2 = class VimeoPlayer2 {
 	constructor (root, options) {
 		this.root = root;
 
@@ -10,32 +10,10 @@ $$.VimeoPlayer = class VimeoPlayer {
 
 		this.playerOrigin = '*';
 		this.playerObject = {};
-
-		this._createScript();
 		this._createPlayer();
-		//this._cacheNodes();
-		//this._bindEvents();
+		this._cacheNodes();
+		this._bindEvents();
 		this._ready();
-	}
-
-	_createScript () {
-		"use strict";
-
-		if (!$('script#js-vimeo-api').length) {
-			var tag = document.createElement('script');
-
-			tag.src = "https://f.vimeocdn.com/js/froogaloop2.min.js";
-			var firstScriptTag = document.getElementsByTagName('script')[ 0 ];
-			firstScriptTag.id = 'js-vimeo-api';
-			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-		}
-
-		var interval = setInterval(() => {
-			if (!_.isUndefined(window.$f)) {
-				clearInterval(interval);
-				this.root.trigger('APIReady');
-			}
-		}, 1);
 	}
 
 	_createPlayer () {
@@ -43,8 +21,7 @@ $$.VimeoPlayer = class VimeoPlayer {
 		let rootClass = this.root.attr('class');
 		let id = _.uniqueId('player_');
 
-		this.root.on('APIReady', () => {
-			let iframe = $(`
+		let iframe = $(`
 			<iframe id="${id}"
 				class="${rootClass}"
 				src="https://player.vimeo.com/video/${this.options.videoId}?api=1&player_id=${id}"
@@ -57,16 +34,11 @@ $$.VimeoPlayer = class VimeoPlayer {
 			</iframe>
 			`);
 
-			this.root.replaceWith(() => {
-				return iframe;
-			});
-
-			this.player = $f(iframe.get(0));
-
-			this.player.addEvent('ready', () => {
-				$('body').trigger('PlayerCreated');
-			});
+		this.root.replaceWith(() => {
+			return iframe;
 		});
+
+		this.player = iframe;
 	}
 
 	_cacheNodes () {
@@ -75,13 +47,8 @@ $$.VimeoPlayer = class VimeoPlayer {
 
 	get duration () {
 		"use strict";
-		var val = '';
-
-		val = this.player.api('getDuration', function (value) {
-			return value;
-		});
-
-		return val;
+		this._post('getDuration');
+		return this.playerObject.getDuration;
 	}
 
 	_onMessageReceived (event) {

@@ -1075,27 +1075,63 @@ $$.VimeoPlayer = (function () {
 		this.options = {};
 
 		_.assign(this.options, options);
+
 		this.playerOrigin = '*';
+		this.playerObject = {};
+
+		this._createScript();
 		this._createPlayer();
-		this._cacheNodes();
-		this._bindEvents();
+		//this._cacheNodes();
+		//this._bindEvents();
 		this._ready();
 	}
 
 	_createClass(VimeoPlayer, [{
+		key: '_createScript',
+		value: function _createScript() {
+			"use strict";
+
+			var _this = this;
+
+			if (!$('script#js-vimeo-api').length) {
+				var tag = document.createElement('script');
+
+				tag.src = "https://f.vimeocdn.com/js/froogaloop2.min.js";
+				var firstScriptTag = document.getElementsByTagName('script')[0];
+				firstScriptTag.id = 'js-vimeo-api';
+				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			}
+
+			var interval = setInterval(function () {
+				if (!_.isUndefined(window.$f)) {
+					clearInterval(interval);
+					_this.root.trigger('APIReady');
+				}
+			}, 1);
+		}
+	}, {
 		key: '_createPlayer',
 		value: function _createPlayer() {
 			"use strict";
+
+			var _this2 = this;
+
 			var rootClass = this.root.attr('class');
 			var id = _.uniqueId('player_');
 
-			var iframe = $('\n\t\t\t<iframe id="' + id + '"\n\t\t\t\tclass="' + rootClass + '"\n\t\t\t\tsrc="https://player.vimeo.com/video/' + this.options.videoId + '?api=1&player_id=' + id + '"\n\t\t\t\twidth="' + this.options.width + '"\n\t\t\t\theight="' + this.options.height + '"\n\t\t\t\tframeborder="0"\n\t\t\t\twebkitallowfullscreen\n\t\t\t\tmozallowfullscreen\n\t\t\t\tallowfullscreen>\n\t\t\t</iframe>\n\t\t\t');
+			this.root.on('APIReady', function () {
+				var iframe = $('\n\t\t\t<iframe id="' + id + '"\n\t\t\t\tclass="' + rootClass + '"\n\t\t\t\tsrc="https://player.vimeo.com/video/' + _this2.options.videoId + '?api=1&player_id=' + id + '"\n\t\t\t\twidth="' + _this2.options.width + '"\n\t\t\t\theight="' + _this2.options.height + '"\n\t\t\t\tframeborder="0"\n\t\t\t\twebkitallowfullscreen\n\t\t\t\tmozallowfullscreen\n\t\t\t\tallowfullscreen>\n\t\t\t</iframe>\n\t\t\t');
 
-			this.root.replaceWith(function () {
-				return iframe;
+				_this2.root.replaceWith(function () {
+					return iframe;
+				});
+
+				_this2.player = $f(iframe.get(0));
+
+				_this2.player.addEvent('ready', function () {
+					$('body').trigger('PlayerCreated');
+				});
 			});
-
-			this.player = iframe;
 		}
 	}, {
 		key: '_cacheNodes',
@@ -1109,7 +1145,6 @@ $$.VimeoPlayer = (function () {
 			if (!/^https?:\/\/player.vimeo.com/.test(event.origin)) {
 				return false;
 			}
-			var self = this;
 
 			if (this.playerOrigin === '*') {
 				this.playerOrigin = event.origin;
@@ -1117,58 +1152,65 @@ $$.VimeoPlayer = (function () {
 
 			var data = JSON.parse(event.data);
 
-			console.log(data.event);
+			if (data.event === 'ready') {
+				this._post('addEventListener', 'loadProgress');
+				this._post('addEventListener', 'playProgress');
+				this._post('addEventListener', 'play');
+				this._post('addEventListener', 'pause');
+				this._post('addEventListener', 'finish');
+				this._post('addEventListener', 'seek');
 
-			switch (data.event) {
-				case 'ready':
-					this.root.trigger('PlayerCreated');
-					break;
-
-				case 'playProgress':
-					onPlayProgress(data.data);
-					break;
-
-				case 'pause':
-					onPause();
-					break;
-
-				case 'finish':
-					onFinish();
-					break;
+				this.root.trigger('PlayerCreated');
 			}
+
+			if (!_.isUndefined(data.method)) {
+				this.playerObject[data.method] = data.value;
+				console.log(this.playerObject.getDuration);
+			}
+
+			/*switch (data.event) {
+    case 'ready':
+    break;
+   		 case 'loadProgress':
+    this.root.trigger('loadProgress', {
+    player_id: data.player_id,
+    data:      data.data
+    });
+    break;
+    case 'playProgress':
+    this.root.trigger('playProgress', {
+    player_id: data.player_id,
+    data:      data.data
+    });
+    break;
+   		 case 'play':
+    this.root.trigger('PlayerStateChange');
+    this.playerState = 1;
+   		 break;
+   		 case 'pause':
+    this.root.trigger('PlayerStateChange');
+    this.playerState = 2;
+    break;
+   		 case 'finish':
+    this.root.trigger('PlayerStateChange');
+    this.playerState = 0;
+    break;
+   		 case 'seek':
+    this.root.trigger('seek', {
+    player_id: data.player_id,
+    data:      data.data
+    });
+   		 break;
+    }*/
 		}
 	}, {
 		key: '_bindEvents',
 		value: function _bindEvents() {
 			"use strict";
-			// Listen for messages from the player
-
 			if (window.addEventListener) {
 				window.addEventListener('message', _.bind(this._onMessageReceived, this), false);
 			} else {
 				window.attachEvent('onmessage', _.bind(this._onMessageReceived, this), false);
-			}
-
-			return;
-
-			// Helper function for sending a message to the player
-
-			function onReady() {
-				post('addEventListener', 'pause');
-				post('addEventListener', 'finish');
-				post('addEventListener', 'playProgress');
-			}
-
-			function onPause() {
-				console.log('paused');
-			}
-
-			function onFinish() {
-				console.log('finished');
-			}
-
-			function onPlayProgress(data) {
-				console.log(data.seconds + 's played');
 			}
 		}
 	}, {
@@ -1211,18 +1253,23 @@ $$.VimeoPlayer = (function () {
 			"use strict";
 		}
 	}, {
+		key: 'duration',
+		get: function get() {
+			"use strict";
+			var val = '';
+
+			val = this.player.api('getDuration', function (value) {
+				return value;
+			});
+
+			return val;
+		}
+	}, {
 		key: 'CurrentTime',
 		get: function get() {
 			"use strict";
 
 			return this._post('getCurrentTime');
-		}
-	}, {
-		key: 'duration',
-		get: function get() {
-			"use strict";
-
-			return this._post('getDuration');
 		}
 	}, {
 		key: 'volume',
@@ -1245,6 +1292,202 @@ $$.VimeoPlayer = (function () {
 	}]);
 
 	return VimeoPlayer;
+})();
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var $$ = $$ || {};
+
+$$.VimeoPlayer2 = (function () {
+	function VimeoPlayer2(root, options) {
+		_classCallCheck(this, VimeoPlayer2);
+
+		this.root = root;
+
+		this.options = {};
+
+		_.assign(this.options, options);
+
+		this.playerOrigin = '*';
+		this.playerObject = {};
+		this._createPlayer();
+		this._cacheNodes();
+		this._bindEvents();
+		this._ready();
+	}
+
+	_createClass(VimeoPlayer2, [{
+		key: '_createPlayer',
+		value: function _createPlayer() {
+			"use strict";
+			var rootClass = this.root.attr('class');
+			var id = _.uniqueId('player_');
+
+			var iframe = $('\n\t\t\t<iframe id="' + id + '"\n\t\t\t\tclass="' + rootClass + '"\n\t\t\t\tsrc="https://player.vimeo.com/video/' + this.options.videoId + '?api=1&player_id=' + id + '"\n\t\t\t\twidth="' + this.options.width + '"\n\t\t\t\theight="' + this.options.height + '"\n\t\t\t\tframeborder="0"\n\t\t\t\twebkitallowfullscreen\n\t\t\t\tmozallowfullscreen\n\t\t\t\tallowfullscreen>\n\t\t\t</iframe>\n\t\t\t');
+
+			this.root.replaceWith(function () {
+				return iframe;
+			});
+
+			this.player = iframe;
+		}
+	}, {
+		key: '_cacheNodes',
+		value: function _cacheNodes() {
+			this.nodes = {};
+		}
+	}, {
+		key: '_onMessageReceived',
+		value: function _onMessageReceived(event) {
+			// Handle messages from the vimeo player only
+			if (!/^https?:\/\/player.vimeo.com/.test(event.origin)) {
+				return false;
+			}
+
+			if (this.playerOrigin === '*') {
+				this.playerOrigin = event.origin;
+			}
+
+			var data = JSON.parse(event.data);
+
+			if (data.event === 'ready') {
+				this._post('addEventListener', 'loadProgress');
+				this._post('addEventListener', 'playProgress');
+				this._post('addEventListener', 'play');
+				this._post('addEventListener', 'pause');
+				this._post('addEventListener', 'finish');
+				this._post('addEventListener', 'seek');
+
+				this.root.trigger('PlayerCreated');
+			}
+
+			if (!_.isUndefined(data.method)) {
+				this.playerObject[data.method] = data.value;
+				console.log(this.playerObject.getDuration);
+			}
+
+			/*switch (data.event) {
+    case 'ready':
+    break;
+   		 case 'loadProgress':
+    this.root.trigger('loadProgress', {
+    player_id: data.player_id,
+    data:      data.data
+    });
+    break;
+    case 'playProgress':
+    this.root.trigger('playProgress', {
+    player_id: data.player_id,
+    data:      data.data
+    });
+    break;
+   		 case 'play':
+    this.root.trigger('PlayerStateChange');
+    this.playerState = 1;
+   		 break;
+   		 case 'pause':
+    this.root.trigger('PlayerStateChange');
+    this.playerState = 2;
+    break;
+   		 case 'finish':
+    this.root.trigger('PlayerStateChange');
+    this.playerState = 0;
+    break;
+   		 case 'seek':
+    this.root.trigger('seek', {
+    player_id: data.player_id,
+    data:      data.data
+    });
+   		 break;
+    }*/
+		}
+	}, {
+		key: '_bindEvents',
+		value: function _bindEvents() {
+			"use strict";
+			if (window.addEventListener) {
+				window.addEventListener('message', _.bind(this._onMessageReceived, this), false);
+			} else {
+				window.attachEvent('onmessage', _.bind(this._onMessageReceived, this), false);
+			}
+		}
+	}, {
+		key: '_post',
+		value: function _post(action, value) {
+			"use strict";
+			var data = {
+				method: action
+			};
+
+			if (value) {
+				data.value = value;
+			}
+
+			var message = JSON.stringify(data);
+
+			this.player.get(0).contentWindow.postMessage(message, this.playerOrigin);
+		}
+	}, {
+		key: 'playVideo',
+		value: function playVideo() {
+			"use strict";
+			this._post('play');
+		}
+	}, {
+		key: 'pauseVideo',
+		value: function pauseVideo() {
+			"use strict";
+			this._post('pause');
+		}
+	}, {
+		key: 'stopVideo',
+		value: function stopVideo() {
+			"use strict";
+			this._post('stop');
+		}
+	}, {
+		key: '_ready',
+		value: function _ready() {
+			"use strict";
+		}
+	}, {
+		key: 'duration',
+		get: function get() {
+			"use strict";
+			this._post('getDuration');
+			return this.playerObject.getDuration;
+		}
+	}, {
+		key: 'CurrentTime',
+		get: function get() {
+			"use strict";
+
+			return this._post('getCurrentTime');
+		}
+	}, {
+		key: 'volume',
+		get: function get() {
+			"use strict";
+			return this._post('getVolume');
+		},
+		set: function set(volume) {
+			"use strict";
+			if (parseInt(volume) > 100) {
+				volume = 100;
+			}
+
+			if (parseInt(volume) < 0) {
+				volume = 0;
+			}
+
+			this._post('setVolume', volume);
+		}
+	}]);
+
+	return VimeoPlayer2;
 })();
 "use strict";
 
@@ -1717,109 +1960,104 @@ var Application = (function () {
 
 			$('.js-vimeo-player').each(function () {
 				var dimmer = $('.js-dimmer');
+
 				var player = new $$.VimeoPlayer($('.js-vimeo-player'), {
 					width: '1101',
 					height: '620',
 					videoId: $(this).data('id')
 				});
 
-				dimmer.removeClass('active');
+				var form = $('.js-form-video');
 
-				player.root.on('PlayerCreated', function () {
-					player.playVideo();
+				$('body').on('PlayerCreated', function () {
+					dimmer.removeClass('active');
+
+					$('.js-progress-time').progress({
+						percent: 0
+					});
+
+					var interval = null;
+
+					//let allTime = $$.secondsToTime(player.duration);
+
+					console.log(player.duration);
+
+					/*
+      $('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
+     		 player.root.on('PlayerStateChange', function () {
+     		 if (player.playerState === 1) {
+      interval = setInterval(() => {
+      let currentTime = parseInt(player.CurrentTime);
+      let duration = parseInt(player.duration);
+     		 let allTime = $$.secondsToTime(player.CurrentTime);
+      $('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
+     		 $('.js-progress-time').progress({
+      percent: parseInt(((currentTime / duration) * 100))
+      });
+      }, 1000);
+      } else {
+      clearInterval(interval);
+      }
+     				 });
+     		 form.on('click', '.js-play', function (event) {
+      event.preventDefault();
+      player.playVideo();
+     		 $(this).addClass('active').siblings().removeClass('active');
+      });
+     		 form.on('click', '.js-pause', function (event) {
+      event.preventDefault();
+      player.pauseVideo();
+     		 $(this).addClass('active').siblings().removeClass('active');
+      });
+     		 form.on('click', '.js-stop', function (event) {
+      event.preventDefault();
+      player.stopVideo();
+     		 $(this).addClass('active').siblings().removeClass('active');
+      });
+     		 form.on('click', '.js-mute', function (event) {
+      event.preventDefault();
+      player.mute = !player.isMuted();
+     		 if (player.isMuted()) {
+      $(this).find('.icon').removeClass('volume off');
+      $(this).find('.icon').addClass('volume up');
+      $('.js-volume').removeClass('disabled');
+      } else {
+      $(this).find('.icon').removeClass('volume up');
+      $(this).find('.icon').addClass('volume off');
+      $('.js-volume').addClass('disabled');
+      }
+      });
+     		 $('.js-volume').progress({
+      percent: player.volume
+      });
+     		 form.on('click', '.js-volume-minus', function (event) {
+      event.preventDefault();
+      if (player.volume === 0) {
+      $('.js-volume').progress({
+      percent: 0
+      });
+      return;
+      }
+     		 player.volume -= 10;
+     		 $('.js-volume').progress({
+      percent: player.volume
+      });
+      });
+     		 form.on('click', '.js-volume-plus', function (event) {
+      event.preventDefault();
+      if (player.volume === 100) {
+      $('.js-volume').progress({
+      percent: 100
+      });
+     		 return;
+      }
+     		 player.volume += 10;
+     		 $('.js-volume').progress({
+      percent: player.volume
+      });
+      });
+      */
 				});
-
-				/*let player = new $$.YouTubePlayer($('.js-youtube-player'), {
-     width:      '1101',
-     height:     '620',
-     videoId:    $(this).data('id'),
-     playerVars: {
-     disablekb: 0
-     }
-     });
-    		 let form = $('.js-form-video');
-    		 player.root.on('PlayerCreated', function () {
-     dimmer.removeClass('active');
-    		 $('.js-progress-time').progress({
-     percent: 0
-     });
-    		 var interval = null;
-    		 let allTime = $$.secondsToTime(player.duration);
-    		 $('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
-    		 player.root.on('PlayerStateChange', function () {
-    		 if (player.playerState === 1) {
-     interval = setInterval(() => {
-     let currentTime = parseInt(player.CurrentTime);
-     let duration = parseInt(player.duration);
-    		 let allTime = $$.secondsToTime(player.CurrentTime);
-     $('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
-    		 $('.js-progress-time').progress({
-     percent: parseInt(((currentTime / duration) * 100))
-     });
-     }, 1000);
-     } else {
-     clearInterval(interval);
-     }
-    
-     });
-    		 form.on('click', '.js-play', function (event) {
-     event.preventDefault();
-     player.playVideo();
-    		 $(this).addClass('active').siblings().removeClass('active');
-     });
-    		 form.on('click', '.js-pause', function (event) {
-     event.preventDefault();
-     player.pauseVideo();
-    		 $(this).addClass('active').siblings().removeClass('active');
-     });
-    		 form.on('click', '.js-stop', function (event) {
-     event.preventDefault();
-     player.stopVideo();
-    		 $(this).addClass('active').siblings().removeClass('active');
-     });
-    		 form.on('click', '.js-mute', function (event) {
-     event.preventDefault();
-     player.mute = !player.isMuted();
-    		 if (player.isMuted()) {
-     $(this).find('.icon').removeClass('volume off');
-     $(this).find('.icon').addClass('volume up');
-     $('.js-volume').removeClass('disabled');
-     } else {
-     $(this).find('.icon').removeClass('volume up');
-     $(this).find('.icon').addClass('volume off');
-     $('.js-volume').addClass('disabled');
-     }
-     });
-    		 $('.js-volume').progress({
-     percent: player.volume
-     });
-    		 form.on('click', '.js-volume-minus', function (event) {
-     event.preventDefault();
-     if (player.volume === 0) {
-     $('.js-volume').progress({
-     percent: 0
-     });
-     return;
-     }
-    		 player.volume -= 10;
-    		 $('.js-volume').progress({
-     percent: player.volume
-     });
-     });
-    		 form.on('click', '.js-volume-plus', function (event) {
-     event.preventDefault();
-     if (player.volume === 100) {
-     $('.js-volume').progress({
-     percent: 100
-     });
-    		 return;
-     }
-    		 player.volume += 10;
-    		 $('.js-volume').progress({
-     percent: player.volume
-     });
-     });
-     });*/
 			});
 		}
 	}]);

@@ -7,10 +7,6 @@
             <div class="sixteen wide column">
                 <div class="embed-responsive embed-responsive-16by9">
                     <div class="embed-responsive-item js-vimeo-player" data-id="76979871"></div>
-                    <!--<iframe id="player1" class="js-vimeo-player" src="https://player.vimeo.com/video/76979871?api=1&player_id=player1"
-                            width="630" height="354" frameborder="0" webkitallowfullscreen mozallowfullscreen
-                            allowfullscreen>
-                    </iframe>-->
                 </div>
             </div>
             <div class="sixteen wide column">
