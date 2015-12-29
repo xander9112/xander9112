@@ -17,6 +17,9 @@
     <a href="/YouTubePlayer" class="item<?= $_SERVER['REQUEST_URI'] == '/YouTubePlayer' ? ' active' : ''; ?>">
         YouTubePlayer
     </a>
+    <a href="/VimeoPlayer" class="item<?= $_SERVER['REQUEST_URI'] == '/VimeoPlayer' ? ' active' : ''; ?>">
+        VimeoPlayer
+    </a>
 
     <div class="ui simple dropdown item">
         GoogleMaps

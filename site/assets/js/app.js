@@ -722,6 +722,23 @@ var Component = (function (_$$$Emitter) {
 })($$.Emitter);
 'use strict';
 
+var $$ = $$ || {};
+
+$$.GoogleAnalytics = {
+	reachGoal: function reachGoal(goal) {
+		if (!_.isUndefined(window.ga)) {
+			ga('send', 'event', 'click', goal);
+		}
+	},
+
+	reachPage: function reachPage(page) {
+		if (!_.isUndefined(window.ga)) {
+			ga('send', 'pageview', page);
+		}
+	}
+};
+'use strict';
+
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
@@ -1043,6 +1060,207 @@ $$.MercatorProjection = (function () {
 })();
 'use strict';
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+var $$ = $$ || {};
+
+$$.VimeoPlayer = (function () {
+	function VimeoPlayer(root, options) {
+		_classCallCheck(this, VimeoPlayer);
+
+		this.root = root;
+
+		this.options = {};
+
+		_.assign(this.options, options);
+		this.playerOrigin = '*';
+		this._createPlayer();
+		this._cacheNodes();
+		this._bindEvents();
+		this._ready();
+	}
+
+	_createClass(VimeoPlayer, [{
+		key: '_createPlayer',
+		value: function _createPlayer() {
+			"use strict";
+			var rootClass = this.root.attr('class');
+			var id = _.uniqueId('player_');
+
+			var iframe = $('\n\t\t\t<iframe id="' + id + '"\n\t\t\t\tclass="' + rootClass + '"\n\t\t\t\tsrc="https://player.vimeo.com/video/' + this.options.videoId + '?api=1&player_id=' + id + '"\n\t\t\t\twidth="' + this.options.width + '"\n\t\t\t\theight="' + this.options.height + '"\n\t\t\t\tframeborder="0"\n\t\t\t\twebkitallowfullscreen\n\t\t\t\tmozallowfullscreen\n\t\t\t\tallowfullscreen>\n\t\t\t</iframe>\n\t\t\t');
+
+			this.root.replaceWith(function () {
+				return iframe;
+			});
+
+			this.player = iframe;
+		}
+	}, {
+		key: '_cacheNodes',
+		value: function _cacheNodes() {
+			this.nodes = {};
+		}
+	}, {
+		key: '_onMessageReceived',
+		value: function _onMessageReceived(event) {
+			// Handle messages from the vimeo player only
+			if (!/^https?:\/\/player.vimeo.com/.test(event.origin)) {
+				return false;
+			}
+			var self = this;
+
+			if (this.playerOrigin === '*') {
+				this.playerOrigin = event.origin;
+			}
+
+			var data = JSON.parse(event.data);
+
+			console.log(data.event);
+
+			switch (data.event) {
+				case 'ready':
+					this.root.trigger('PlayerCreated');
+					break;
+
+				case 'playProgress':
+					onPlayProgress(data.data);
+					break;
+
+				case 'pause':
+					onPause();
+					break;
+
+				case 'finish':
+					onFinish();
+					break;
+			}
+		}
+	}, {
+		key: '_bindEvents',
+		value: function _bindEvents() {
+			"use strict";
+			// Listen for messages from the player
+
+			if (window.addEventListener) {
+				window.addEventListener('message', _.bind(this._onMessageReceived, this), false);
+			} else {
+				window.attachEvent('onmessage', _.bind(this._onMessageReceived, this), false);
+			}
+
+			return;
+
+			// Helper function for sending a message to the player
+
+			function onReady() {
+				post('addEventListener', 'pause');
+				post('addEventListener', 'finish');
+				post('addEventListener', 'playProgress');
+			}
+
+			function onPause() {
+				console.log('paused');
+			}
+
+			function onFinish() {
+				console.log('finished');
+			}
+
+			function onPlayProgress(data) {
+				console.log(data.seconds + 's played');
+			}
+		}
+	}, {
+		key: '_post',
+		value: function _post(action, value) {
+			"use strict";
+			var data = {
+				method: action
+			};
+
+			if (value) {
+				data.value = value;
+			}
+
+			var message = JSON.stringify(data);
+
+			this.player.get(0).contentWindow.postMessage(message, this.playerOrigin);
+		}
+	}, {
+		key: 'playVideo',
+		value: function playVideo() {
+			"use strict";
+			this._post('play');
+		}
+	}, {
+		key: 'pauseVideo',
+		value: function pauseVideo() {
+			"use strict";
+			this._post('pause');
+		}
+	}, {
+		key: 'stopVideo',
+		value: function stopVideo() {
+			"use strict";
+			this._post('stop');
+		}
+	}, {
+		key: '_ready',
+		value: function _ready() {
+			"use strict";
+		}
+	}, {
+		key: 'CurrentTime',
+		get: function get() {
+			"use strict";
+
+			return this._post('getCurrentTime');
+		}
+	}, {
+		key: 'duration',
+		get: function get() {
+			"use strict";
+
+			return this._post('getDuration');
+		}
+	}, {
+		key: 'volume',
+		get: function get() {
+			"use strict";
+			return this._post('getVolume');
+		},
+		set: function set(volume) {
+			"use strict";
+			if (parseInt(volume) > 100) {
+				volume = 100;
+			}
+
+			if (parseInt(volume) < 0) {
+				volume = 0;
+			}
+
+			this._post('setVolume', volume);
+		}
+	}]);
+
+	return VimeoPlayer;
+})();
+"use strict";
+
+var $$ = $$ || {};
+
+$$.YandexMetrika = {
+    counter: null,
+
+    reachGoal: function reachGoal(goal) {
+        if (this.counter) {
+            this.counter.reachGoal(goal);
+        }
+    }
+};
+'use strict';
+
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -1293,8 +1511,9 @@ var Application = (function () {
 	function Application() {
 		_classCallCheck(this, Application);
 
-		this._initMap();
-		this._initYouTubePlayer();
+		//this._initMap();
+		//this._initYouTubePlayer();
+		this._initVimeoPlayer();
 	}
 
 	_createClass(Application, [{
@@ -1489,6 +1708,118 @@ var Application = (function () {
 						});
 					});
 				});
+			});
+		}
+	}, {
+		key: '_initVimeoPlayer',
+		value: function _initVimeoPlayer() {
+			"use strict";
+
+			$('.js-vimeo-player').each(function () {
+				var dimmer = $('.js-dimmer');
+				var player = new $$.VimeoPlayer($('.js-vimeo-player'), {
+					width: '1101',
+					height: '620',
+					videoId: $(this).data('id')
+				});
+
+				dimmer.removeClass('active');
+
+				player.root.on('PlayerCreated', function () {
+					player.playVideo();
+				});
+
+				/*let player = new $$.YouTubePlayer($('.js-youtube-player'), {
+     width:      '1101',
+     height:     '620',
+     videoId:    $(this).data('id'),
+     playerVars: {
+     disablekb: 0
+     }
+     });
+    		 let form = $('.js-form-video');
+    		 player.root.on('PlayerCreated', function () {
+     dimmer.removeClass('active');
+    		 $('.js-progress-time').progress({
+     percent: 0
+     });
+    		 var interval = null;
+    		 let allTime = $$.secondsToTime(player.duration);
+    		 $('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
+    		 player.root.on('PlayerStateChange', function () {
+    		 if (player.playerState === 1) {
+     interval = setInterval(() => {
+     let currentTime = parseInt(player.CurrentTime);
+     let duration = parseInt(player.duration);
+    		 let allTime = $$.secondsToTime(player.CurrentTime);
+     $('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
+    		 $('.js-progress-time').progress({
+     percent: parseInt(((currentTime / duration) * 100))
+     });
+     }, 1000);
+     } else {
+     clearInterval(interval);
+     }
+    
+     });
+    		 form.on('click', '.js-play', function (event) {
+     event.preventDefault();
+     player.playVideo();
+    		 $(this).addClass('active').siblings().removeClass('active');
+     });
+    		 form.on('click', '.js-pause', function (event) {
+     event.preventDefault();
+     player.pauseVideo();
+    		 $(this).addClass('active').siblings().removeClass('active');
+     });
+    		 form.on('click', '.js-stop', function (event) {
+     event.preventDefault();
+     player.stopVideo();
+    		 $(this).addClass('active').siblings().removeClass('active');
+     });
+    		 form.on('click', '.js-mute', function (event) {
+     event.preventDefault();
+     player.mute = !player.isMuted();
+    		 if (player.isMuted()) {
+     $(this).find('.icon').removeClass('volume off');
+     $(this).find('.icon').addClass('volume up');
+     $('.js-volume').removeClass('disabled');
+     } else {
+     $(this).find('.icon').removeClass('volume up');
+     $(this).find('.icon').addClass('volume off');
+     $('.js-volume').addClass('disabled');
+     }
+     });
+    		 $('.js-volume').progress({
+     percent: player.volume
+     });
+    		 form.on('click', '.js-volume-minus', function (event) {
+     event.preventDefault();
+     if (player.volume === 0) {
+     $('.js-volume').progress({
+     percent: 0
+     });
+     return;
+     }
+    		 player.volume -= 10;
+    		 $('.js-volume').progress({
+     percent: player.volume
+     });
+     });
+    		 form.on('click', '.js-volume-plus', function (event) {
+     event.preventDefault();
+     if (player.volume === 100) {
+     $('.js-volume').progress({
+     percent: 100
+     });
+    		 return;
+     }
+    		 player.volume += 10;
+    		 $('.js-volume').progress({
+     percent: player.volume
+     });
+     });
+     });*/
 			});
 		}
 	}]);
