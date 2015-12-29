@@ -75,13 +75,10 @@ $$.VimeoPlayer = class VimeoPlayer {
 
 	get duration () {
 		"use strict";
-		var val = '';
 
-		val = this.player.api('getDuration', function (value) {
+		this.player.api('getDuration', function (value) {
 			return value;
 		});
-
-		return val;
 	}
 
 	_onMessageReceived (event) {

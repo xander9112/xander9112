@@ -1256,13 +1256,10 @@ $$.VimeoPlayer = (function () {
 		key: 'duration',
 		get: function get() {
 			"use strict";
-			var val = '';
 
-			val = this.player.api('getDuration', function (value) {
+			this.player.api('getDuration', function (value) {
 				return value;
 			});
-
-			return val;
 		}
 	}, {
 		key: 'CurrentTime',
