@@ -2,8 +2,8 @@ var $$ = $$ || {};
 
 class Application {
 	constructor () {
-		//this._initMap();
-		//this._initYouTubePlayer();
+		this._initMap();
+		this._initYouTubePlayer();
 		this._initVimeoPlayer();
 	}
 

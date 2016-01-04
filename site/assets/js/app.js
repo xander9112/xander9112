@@ -1729,8 +1729,8 @@ var Application = (function () {
 	function Application() {
 		_classCallCheck(this, Application);
 
-		//this._initMap();
-		//this._initYouTubePlayer();
+		this._initMap();
+		this._initYouTubePlayer();
 		this._initVimeoPlayer();
 	}
 
