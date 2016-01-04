@@ -29798,1039 +29798,2614 @@ $.fn.visibility.settings = {
  * Bounce.js 0.8.2
  * MIT license
  */
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.Bounce=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-var Component, EasingClasses, Matrix4D;
+!function (e) {
+	if ("object" == typeof exports)module.exports = e(); else if ("function" == typeof define && define.amd)define(e); else {
+		var f;
+		"undefined" != typeof window ? f = window : "undefined" != typeof global ? f = global : "undefined" != typeof self && (f = self), f.Bounce = e()
+	}
+}(function () {
+	var define, module, exports;
+	return (function e (t, n, r) {
+		function s (o, u) {
+			if (!n[ o ]) {
+				if (!t[ o ]) {
+					var a = typeof require == "function" && require;
+					if (!u && a)return a(o, !0);
+					if (i)return i(o, !0);
+					throw new Error("Cannot find module '" + o + "'")
+				}
+				var f = n[ o ] = { exports: {} };
+				t[ o ][ 0 ].call(f.exports, function (e) {
+					var n = t[ o ][ 1 ][ e ];
+					return s(n ? n : e)
+				}, f, f.exports, e, t, n, r)
+			}
+			return n[ o ].exports
+		}
 
-Matrix4D = _dereq_("../math/matrix4d");
+		var i = typeof require == "function" && require;
+		for (var o = 0; o < r.length; o++)s(r[ o ]);
+		return s
+	})({
+		1:                                                                        [ function (_dereq_, module, exports) {
+			var Component, EasingClasses, Matrix4D;
 
-EasingClasses = {
-  bounce: _dereq_("../easing/bounce"),
-  sway: _dereq_("../easing/sway"),
-  hardbounce: _dereq_("../easing/hardbounce"),
-  hardsway: _dereq_("../easing/hardsway")
+			Matrix4D = _dereq_("../math/matrix4d");
+
+			EasingClasses = {
+				bounce:     _dereq_("../easing/bounce"),
+				sway:       _dereq_("../easing/sway"),
+				hardbounce: _dereq_("../easing/hardbounce"),
+				hardsway:   _dereq_("../easing/hardsway")
+			};
+
+			Component = (function () {
+				Component.prototype.easing = "bounce";
+
+				Component.prototype.duration = 1000;
+
+				Component.prototype.delay = 0;
+
+				Component.prototype.from = null;
+
+				Component.prototype.to = null;
+
+				function Component (options) {
+					options || (options = {});
+					if (options.easing != null) {
+						this.easing = options.easing;
+					}
+					if (options.duration != null) {
+						this.duration = options.duration;
+					}
+					if (options.delay != null) {
+						this.delay = options.delay;
+					}
+					if (options.from != null) {
+						this.from = options.from;
+					}
+					if (options.to != null) {
+						this.to = options.to;
+					}
+					this.easingObject = new EasingClasses[ this.easing ](options);
+				}
+
+				Component.prototype.calculateEase = function (ratio) {
+					return this.easingObject.calculate(ratio);
+				};
+
+				Component.prototype.getMatrix = function () {
+					return new Matrix4D().identity();
+				};
+
+				Component.prototype.getEasedMatrix = function (ratio) {
+					return this.getMatrix();
+				};
+
+				Component.prototype.serialize = function () {
+					var key, serialized, value, _ref;
+					serialized = {
+						type:     this.constructor.name.toLowerCase(),
+						easing:   this.easing,
+						duration: this.duration,
+						delay:    this.delay,
+						from:     this.from,
+						to:       this.to
+					};
+					_ref = this.easingObject.serialize();
+					for (key in _ref) {
+						value = _ref[ key ];
+						serialized[ key ] = value;
+					}
+					return serialized;
+				};
+
+				return Component;
+
+			})();
+
+			module.exports = Component;
+
+
+		}, {
+			"../easing/bounce":     6,
+			"../easing/hardbounce": 7,
+			"../easing/hardsway":   8,
+			"../easing/sway":       10,
+			"../math/matrix4d":     13
+		} ],
+		2:                                                                        [ function (_dereq_, module, exports) {
+			var Component, Matrix4D, Rotate, Vector2D,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			Matrix4D = _dereq_("../math/matrix4d");
+
+			Vector2D = _dereq_("../math/vector2d");
+
+			Component = _dereq_("./index");
+
+			Rotate = (function (_super) {
+				__extends(Rotate, _super);
+
+				Rotate.prototype.from = 0;
+
+				Rotate.prototype.to = 90;
+
+				function Rotate () {
+					Rotate.__super__.constructor.apply(this, arguments);
+					this.diff = this.to - this.from;
+				}
+
+				Rotate.prototype.getMatrix = function (degrees) {
+					var c, radians, s;
+					radians = (degrees / 180) * Math.PI;
+					c = Math.cos(radians);
+					s = Math.sin(radians);
+					return new Matrix4D([ c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]);
+				};
+
+				Rotate.prototype.getEasedMatrix = function (ratio) {
+					var easedAngle, easedRatio;
+					easedRatio = this.calculateEase(ratio);
+					easedAngle = this.from + this.diff * easedRatio;
+					return this.getMatrix(easedAngle);
+				};
+
+				return Rotate;
+
+			})(Component);
+
+			module.exports = Rotate;
+
+
+		}, { "../math/matrix4d": 13, "../math/vector2d": 14, "./index": 1 } ],
+		3:                                                                        [ function (_dereq_, module, exports) {
+			var Component, Matrix4D, Scale, Vector2D,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			Matrix4D = _dereq_("../math/matrix4d");
+
+			Vector2D = _dereq_("../math/vector2d");
+
+			Component = _dereq_("./index");
+
+			Scale = (function (_super) {
+				__extends(Scale, _super);
+
+				Scale.prototype.from = {
+					x: 0.5,
+					y: 0.5
+				};
+
+				Scale.prototype.to = {
+					x: 1,
+					y: 1
+				};
+
+				function Scale () {
+					Scale.__super__.constructor.apply(this, arguments);
+					this.fromVector = new Vector2D(this.from.x, this.from.y);
+					this.toVector = new Vector2D(this.to.x, this.to.y);
+					this.diff = this.toVector.clone().subtract(this.fromVector);
+				}
+
+				Scale.prototype.getMatrix = function (x, y) {
+					var z;
+					z = 1;
+					return new Matrix4D([ x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1 ]);
+				};
+
+				Scale.prototype.getEasedMatrix = function (ratio) {
+					var easedRatio, easedVector;
+					easedRatio = this.calculateEase(ratio);
+					easedVector = this.fromVector.clone().add(this.diff.clone().multiply(easedRatio));
+					return this.getMatrix(easedVector.x, easedVector.y);
+				};
+
+				return Scale;
+
+			})(Component);
+
+			module.exports = Scale;
+
+
+		}, { "../math/matrix4d": 13, "../math/vector2d": 14, "./index": 1 } ],
+		4:                                                                        [ function (_dereq_, module, exports) {
+			var Component, Matrix4D, Skew, Vector2D,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			Matrix4D = _dereq_("../math/matrix4d");
+
+			Vector2D = _dereq_("../math/vector2d");
+
+			Component = _dereq_("./index");
+
+			Skew = (function (_super) {
+				__extends(Skew, _super);
+
+				Skew.prototype.from = {
+					x: 0,
+					y: 0
+				};
+
+				Skew.prototype.to = {
+					x: 20,
+					y: 0
+				};
+
+				function Skew () {
+					Skew.__super__.constructor.apply(this, arguments);
+					this.fromVector = new Vector2D(this.from.x, this.from.y);
+					this.toVector = new Vector2D(this.to.x, this.to.y);
+					this.diff = this.toVector.clone().subtract(this.fromVector);
+				}
+
+				Skew.prototype.getMatrix = function (degreesX, degreesY) {
+					var radiansX, radiansY, tx, ty;
+					radiansX = (degreesX / 180) * Math.PI;
+					radiansY = (degreesY / 180) * Math.PI;
+					tx = Math.tan(radiansX);
+					ty = Math.tan(radiansY);
+					return new Matrix4D([ 1, tx, 0, 0, ty, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]);
+				};
+
+				Skew.prototype.getEasedMatrix = function (ratio) {
+					var easedRatio, easedVector;
+					easedRatio = this.calculateEase(ratio);
+					easedVector = this.fromVector.clone().add(this.diff.clone().multiply(easedRatio));
+					return this.getMatrix(easedVector.x, easedVector.y);
+				};
+
+				return Skew;
+
+			})(Component);
+
+			module.exports = Skew;
+
+
+		}, { "../math/matrix4d": 13, "../math/vector2d": 14, "./index": 1 } ],
+		5:                                                                        [ function (_dereq_, module, exports) {
+			var Component, Matrix4D, Translate, Vector2D,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			Matrix4D = _dereq_("../math/matrix4d");
+
+			Vector2D = _dereq_("../math/vector2d");
+
+			Component = _dereq_("./index");
+
+			Translate = (function (_super) {
+				__extends(Translate, _super);
+
+				Translate.prototype.from = {
+					x: 0,
+					y: 0
+				};
+
+				Translate.prototype.to = {
+					x: 0,
+					y: 0
+				};
+
+				function Translate () {
+					Translate.__super__.constructor.apply(this, arguments);
+					this.fromVector = new Vector2D(this.from.x, this.from.y);
+					this.toVector = new Vector2D(this.to.x, this.to.y);
+					this.diff = this.toVector.clone().subtract(this.fromVector);
+				}
+
+				Translate.prototype.getMatrix = function (x, y) {
+					var z;
+					z = 0;
+					return new Matrix4D([ 1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1 ]);
+				};
+
+				Translate.prototype.getEasedMatrix = function (ratio) {
+					var easedRatio, easedVector;
+					easedRatio = this.calculateEase(ratio);
+					easedVector = this.fromVector.clone().add(this.diff.clone().multiply(easedRatio));
+					return this.getMatrix(easedVector.x, easedVector.y);
+				};
+
+				return Translate;
+
+			})(Component);
+
+			module.exports = Translate;
+
+
+		}, { "../math/matrix4d": 13, "../math/vector2d": 14, "./index": 1 } ],
+		6:                                                                        [ function (_dereq_, module, exports) {
+			var BounceEasing, Easing,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			Easing = _dereq_("./index");
+
+			BounceEasing = (function (_super) {
+				__extends(BounceEasing, _super);
+
+				BounceEasing.prototype.bounces = 4;
+
+				BounceEasing.prototype.stiffness = 3;
+
+				function BounceEasing (options) {
+					var threshold;
+					if (options == null) {
+						options = {};
+					}
+					BounceEasing.__super__.constructor.apply(this, arguments);
+					if (options.stiffness != null) {
+						this.stiffness = options.stiffness;
+					}
+					if (options.bounces != null) {
+						this.bounces = options.bounces;
+					}
+					this.alpha = this.stiffness / 100;
+					threshold = 0.005 / Math.pow(10, this.stiffness);
+					this.limit = Math.floor(Math.log(threshold) / -this.alpha);
+					this.omega = this.calculateOmega(this.bounces, this.limit);
+				}
+
+				BounceEasing.prototype.calculate = function (ratio) {
+					var t;
+					if (ratio >= 1) {
+						return 1;
+					}
+					t = ratio * this.limit;
+					return 1 - this.exponent(t) * this.oscillation(t);
+				};
+
+				BounceEasing.prototype.calculateOmega = function (bounces, limit) {
+					return (this.bounces + 0.5) * Math.PI / this.limit;
+				};
+
+				BounceEasing.prototype.exponent = function (t) {
+					return Math.pow(Math.E, -this.alpha * t);
+				};
+
+				BounceEasing.prototype.oscillation = function (t) {
+					return Math.cos(this.omega * t);
+				};
+
+				BounceEasing.prototype.serialize = function () {
+					return {
+						stiffness: this.stiffness,
+						bounces:   this.bounces
+					};
+				};
+
+				return BounceEasing;
+
+			})(Easing);
+
+			module.exports = BounceEasing;
+
+
+		}, { "./index": 9 } ],
+		7:                                                                        [ function (_dereq_, module, exports) {
+			var BounceEasing, HardBounceEasing,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			BounceEasing = _dereq_("./bounce");
+
+			HardBounceEasing = (function (_super) {
+				__extends(HardBounceEasing, _super);
+
+				function HardBounceEasing () {
+					return HardBounceEasing.__super__.constructor.apply(this, arguments);
+				}
+
+				HardBounceEasing.prototype.oscillation = function (t) {
+					return Math.abs(Math.cos(this.omega * t));
+				};
+
+				return HardBounceEasing;
+
+			})(BounceEasing);
+
+			module.exports = HardBounceEasing;
+
+
+		}, { "./bounce": 6 } ],
+		8:                                                                        [ function (_dereq_, module, exports) {
+			var HardSwayEasing, SwayEasing,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			SwayEasing = _dereq_("./sway");
+
+			HardSwayEasing = (function (_super) {
+				__extends(HardSwayEasing, _super);
+
+				function HardSwayEasing () {
+					return HardSwayEasing.__super__.constructor.apply(this, arguments);
+				}
+
+				HardSwayEasing.prototype.oscillation = function (t) {
+					return Math.abs(Math.sin(this.omega * t));
+				};
+
+				return HardSwayEasing;
+
+			})(SwayEasing);
+
+			module.exports = HardSwayEasing;
+
+
+		}, { "./sway": 10 } ],
+		9:                                                                        [ function (_dereq_, module, exports) {
+			var Easing, MathHelpers;
+
+			MathHelpers = _dereq_("../math/helpers");
+
+			Easing = (function () {
+				function Easing () {
+				}
+
+				Easing.prototype.calculate = function (ratio) {
+					return ratio;
+				};
+
+				Easing.prototype.serialize = function () {
+					return {};
+				};
+
+				Easing.prototype.findOptimalKeyPoints = function (threshold, resolution) {
+					var area, halfway, i, keyPoint, keyPoints, loops, result, values;
+					if (threshold == null) {
+						threshold = 1.0;
+					}
+					if (resolution == null) {
+						resolution = 1000;
+					}
+					keyPoints = [ 0 ];
+					values = (function () {
+						var _i, _results;
+						_results = [];
+						for (i = _i = 0; 0 <= resolution ? _i < resolution : _i > resolution; i = 0 <= resolution ? ++_i : --_i) {
+							_results.push(this.calculate(i / resolution));
+						}
+						return _results;
+					}).call(this);
+					keyPoints = keyPoints.concat(MathHelpers.findTurningPoints(values));
+					keyPoints.push(resolution - 1);
+					i = 0;
+					loops = 1000;
+					while (loops--) {
+						if (i === keyPoints.length - 1) {
+							break;
+						}
+						area = MathHelpers.areaBetweenLineAndCurve(values, keyPoints[ i ], keyPoints[ i + 1 ]);
+						if (area <= threshold) {
+							i++;
+						} else {
+							halfway = Math.round(keyPoints[ i ] + (keyPoints[ i + 1 ] - keyPoints[ i ]) / 2);
+							keyPoints.splice(i + 1, 0, halfway);
+						}
+					}
+					if (loops === 0) {
+						return [];
+					}
+					return result = (function () {
+						var _i, _len, _results;
+						_results = [];
+						for (_i = 0, _len = keyPoints.length; _i < _len; _i++) {
+							keyPoint = keyPoints[ _i ];
+							_results.push(keyPoint / (resolution - 1));
+						}
+						return _results;
+					})();
+				};
+
+				return Easing;
+
+			})();
+
+			module.exports = Easing;
+
+
+		}, { "../math/helpers": 12 } ],
+		10:                                                                       [ function (_dereq_, module, exports) {
+			var BounceEasing, SwayEasing,
+				__hasProp = {}.hasOwnProperty,
+				__extends = function (child, parent) {
+					for (var key in parent) {
+						if (__hasProp.call(parent, key)) child[ key ] = parent[ key ];
+					}
+					function ctor () {
+						this.constructor = child;
+					}
+
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				};
+
+			BounceEasing = _dereq_("./bounce");
+
+			SwayEasing = (function (_super) {
+				__extends(SwayEasing, _super);
+
+				function SwayEasing () {
+					return SwayEasing.__super__.constructor.apply(this, arguments);
+				}
+
+				SwayEasing.prototype.calculate = function (ratio) {
+					var t;
+					if (ratio >= 1) {
+						return 0;
+					}
+					t = ratio * this.limit;
+					return this.exponent(t) * this.oscillation(t);
+				};
+
+				SwayEasing.prototype.calculateOmega = function (bounces, limit) {
+					return this.bounces * Math.PI / this.limit;
+				};
+
+				SwayEasing.prototype.oscillation = function (t) {
+					return Math.sin(this.omega * t);
+				};
+
+				return SwayEasing;
+
+			})(BounceEasing);
+
+			module.exports = SwayEasing;
+
+
+		}, { "./bounce": 6 } ],
+		11:                                                                       [ function (_dereq_, module, exports) {
+			var Bounce, ComponentClasses, Matrix4D;
+
+			Matrix4D = _dereq_("./math/matrix4d");
+
+			ComponentClasses = {
+				scale:     _dereq_("./components/scale"),
+				rotate:    _dereq_("./components/rotate"),
+				translate: _dereq_("./components/translate"),
+				skew:      _dereq_("./components/skew")
+			};
+
+			Bounce = (function () {
+				Bounce.FPS = 30;
+
+				Bounce.counter = 1;
+
+				Bounce.prototype.components = null;
+
+				Bounce.prototype.duration = 0;
+
+				function Bounce () {
+					this.components = [];
+				}
+
+				Bounce.prototype.scale = function (options) {
+					return this.addComponent(new ComponentClasses[ "scale" ](options));
+				};
+
+				Bounce.prototype.rotate = function (options) {
+					return this.addComponent(new ComponentClasses[ "rotate" ](options));
+				};
+
+				Bounce.prototype.translate = function (options) {
+					return this.addComponent(new ComponentClasses[ "translate" ](options));
+				};
+
+				Bounce.prototype.skew = function (options) {
+					return this.addComponent(new ComponentClasses[ "skew" ](options));
+				};
+
+				Bounce.prototype.addComponent = function (component) {
+					this.components.push(component);
+					this.updateDuration();
+					return this;
+				};
+
+				Bounce.prototype.serialize = function () {
+					var component, serialized, _i, _len, _ref;
+					serialized = [];
+					_ref = this.components;
+					for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+						component = _ref[ _i ];
+						serialized.push(component.serialize());
+					}
+					return serialized;
+				};
+
+				Bounce.prototype.deserialize = function (serialized) {
+					var options, _i, _len;
+					for (_i = 0, _len = serialized.length; _i < _len; _i++) {
+						options = serialized[ _i ];
+						this.addComponent(new ComponentClasses[ options.type ](options));
+					}
+					return this;
+				};
+
+				Bounce.prototype.updateDuration = function () {
+					return this.duration = this.components.map(function (component) {
+						return component.duration + component.delay;
+					}).reduce(function (a, b) {
+						return Math.max(a, b);
+					});
+				};
+
+				Bounce.prototype.define = function (name) {
+					this.name = name || Bounce.generateName();
+					this.styleElement = document.createElement("style");
+					this.styleElement.innerHTML = this.getKeyframeCSS({
+						name:   this.name,
+						prefix: true
+					});
+					document.body.appendChild(this.styleElement);
+					return this;
+				};
+
+				Bounce.prototype.applyTo = function (elements, options) {
+					var css, deferred, element, prefix, prefixes, _i, _j, _len, _len1, _ref;
+					if (options == null) {
+						options = {};
+					}
+					this.define();
+					if (!elements.length) {
+						elements = [ elements ];
+					}
+					prefixes = this.getPrefixes();
+					deferred = null;
+					if (window.jQuery && window.jQuery.Deferred) {
+						deferred = new window.jQuery.Deferred();
+					}
+					for (_i = 0, _len = elements.length; _i < _len; _i++) {
+						element = elements[ _i ];
+						_ref = prefixes.animation;
+						for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+							prefix = _ref[ _j ];
+							css = [ this.name, "" + this.duration + "ms", "linear", "both" ];
+							if (options.loop) {
+								css.push("infinite");
+							}
+							element.style[ "" + prefix + "animation" ] = css.join(" ");
+						}
+					}
+					if (!options.loop) {
+						setTimeout(((function (_this) {
+							return function () {
+								if (options.remove) {
+									_this.remove();
+								}
+								if (typeof options.onComplete === "function") {
+									options.onComplete();
+								}
+								if (deferred) {
+									return deferred.resolve();
+								}
+							};
+						})(this)), this.duration);
+					}
+					return deferred;
+				};
+
+				Bounce.prototype.remove = function () {
+					var _ref;
+					if (!this.styleElement) {
+						return;
+					}
+					if (this.styleElement.remove) {
+						return this.styleElement.remove();
+					} else {
+						return (_ref = this.styleElement.parentNode) != null ? _ref.removeChild(this.styleElement) : void 0;
+					}
+				};
+
+				Bounce.prototype.getPrefixes = function (force) {
+					var prefixes, style;
+					prefixes = {
+						transform: [ "" ],
+						animation: [ "" ]
+					};
+					style = document.createElement("dummy").style;
+					if (force || (!("transform" in style) && "webkitTransform" in style)) {
+						prefixes.transform = [ "-webkit-", "" ];
+					}
+					if (force || (!("animation" in style) && "webkitAnimation" in style)) {
+						prefixes.animation = [ "-webkit-", "" ];
+					}
+					return prefixes;
+				};
+
+				Bounce.prototype.getKeyframeCSS = function (options) {
+					var animations, key, keyframeList, keyframes, matrix, prefix, prefixes, transformString, transforms, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+					if (options == null) {
+						options = {};
+					}
+					this.name = options.name || Bounce.generateName();
+					prefixes = {
+						transform: [ "" ],
+						animation: [ "" ]
+					};
+					if (options.prefix || options.forcePrefix) {
+						prefixes = this.getPrefixes(options.forcePrefix);
+					}
+					keyframeList = [];
+					keyframes = this.getKeyframes(options);
+					_ref = this.keys;
+					for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+						key = _ref[ _i ];
+						matrix = keyframes[ key ];
+						transformString = "matrix3d" + matrix;
+						transforms = [];
+						_ref1 = prefixes.transform;
+						for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+							prefix = _ref1[ _j ];
+							transforms.push("" + prefix + "transform: " + transformString + ";");
+						}
+						keyframeList.push("" + (Math.round(key * 100 * 100) / 100) + "% { " + (transforms.join(" ")) + " }");
+					}
+					animations = [];
+					_ref2 = prefixes.animation;
+					for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+						prefix = _ref2[ _k ];
+						animations.push("@" + prefix + "keyframes " + this.name + " { \n  " + (keyframeList.join("\n  ")) + " \n}");
+					}
+					return animations.join("\n\n");
+				};
+
+				Bounce.prototype.getKeyframes = function (options) {
+					var component, componentKeys, currentTime, frames, i, key, keyframes, keys, matrix, ratio, _i, _j, _k, _l, _len, _len1, _len2, _ref, _ref1;
+					if (options == null) {
+						options = {};
+					}
+					keys = [ 0, 1 ];
+					if (options.optimized) {
+						_ref = this.components;
+						for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+							component = _ref[ _i ];
+							componentKeys = component.easingObject.findOptimalKeyPoints().map((function (_this) {
+								return function (key) {
+									return (key * component.duration / _this.duration) + (component.delay / _this.duration);
+								};
+							})(this));
+							if (component.delay) {
+								componentKeys.push((component.delay / this.duration) - 0.001);
+							}
+							keys = keys.concat(componentKeys);
+						}
+					} else {
+						frames = Math.round((this.duration / 1000) * Bounce.FPS);
+						for (i = _j = 0; 0 <= frames ? _j <= frames : _j >= frames; i = 0 <= frames ? ++_j : --_j) {
+							keys.push(i / frames);
+						}
+					}
+					keys = keys.sort(function (a, b) {
+						return a - b;
+					});
+					this.keys = [];
+					keyframes = {};
+					for (_k = 0, _len1 = keys.length; _k < _len1; _k++) {
+						key = keys[ _k ];
+						if (keyframes[ key ]) {
+							continue;
+						}
+						matrix = new Matrix4D().identity();
+						_ref1 = this.components;
+						for (_l = 0, _len2 = _ref1.length; _l < _len2; _l++) {
+							component = _ref1[ _l ];
+							currentTime = key * this.duration;
+							if ((component.delay - currentTime) > 1e-8) {
+								continue;
+							}
+							ratio = (key - component.delay / this.duration) / (component.duration / this.duration);
+							matrix.multiply(component.getEasedMatrix(ratio));
+						}
+						this.keys.push(key);
+						keyframes[ key ] = matrix.transpose().toFixed(3);
+					}
+					return keyframes;
+				};
+
+				Bounce.generateName = function () {
+					return "animation-" + (Bounce.counter++);
+				};
+
+				Bounce.isSupported = function () {
+					var property, propertyIsSupported, propertyList, propertyLists, style, _i, _j, _len, _len1;
+					style = document.createElement("dummy").style;
+					propertyLists = [ [ "transform", "webkitTransform" ], [ "animation", "webkitAnimation" ] ];
+					for (_i = 0, _len = propertyLists.length; _i < _len; _i++) {
+						propertyList = propertyLists[ _i ];
+						propertyIsSupported = false;
+						for (_j = 0, _len1 = propertyList.length; _j < _len1; _j++) {
+							property = propertyList[ _j ];
+							propertyIsSupported || (propertyIsSupported = property in style);
+						}
+						if (!propertyIsSupported) {
+							return false;
+						}
+					}
+					return true;
+				};
+
+				return Bounce;
+
+			})();
+
+			module.exports = Bounce;
+
+
+		}, { "./components/rotate":   2,
+			"./components/scale":     3,
+			"./components/skew":      4,
+			"./components/translate": 5,
+			"./math/matrix4d":        13
+		} ],
+		12:                                                                       [ function (_dereq_, module, exports) {
+			var MathHelpers;
+
+			MathHelpers = (function () {
+				function MathHelpers () {
+				}
+
+				MathHelpers.prototype.sign = function (value) {
+					if (value < 0) {
+						return -1;
+					}
+					return 1;
+				};
+
+				MathHelpers.prototype.findTurningPoints = function (values) {
+					var i, signA, signB, turningPoints, _i, _ref;
+					turningPoints = [];
+					for (i = _i = 1, _ref = values.length - 1; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
+						signA = this.sign(values[ i ] - values[ i - 1 ]);
+						signB = this.sign(values[ i + 1 ] - values[ i ]);
+						if (signA !== signB) {
+							turningPoints.push(i);
+						}
+					}
+					return turningPoints;
+				};
+
+				MathHelpers.prototype.areaBetweenLineAndCurve = function (values, start, end) {
+					var area, curveValue, i, length, lineValue, yEnd, yStart, _i;
+					length = end - start;
+					yStart = values[ start ];
+					yEnd = values[ end ];
+					area = 0;
+					for (i = _i = 0; 0 <= length ? _i <= length : _i >= length; i = 0 <= length ? ++_i : --_i) {
+						curveValue = values[ start + i ];
+						lineValue = yStart + (i / length) * (yEnd - yStart);
+						area += Math.abs(lineValue - curveValue);
+					}
+					return area;
+				};
+
+				return MathHelpers;
+
+			})();
+
+			module.exports = new MathHelpers;
+
+
+		}, {} ],
+		13:                                                                       [ function (_dereq_, module, exports) {
+			var Matrix4D;
+
+			Matrix4D = (function () {
+				Matrix4D.prototype._array = null;
+
+				function Matrix4D (array) {
+					this._array = (array != null ? array.slice(0) : void 0) || [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+				}
+
+				Matrix4D.prototype.equals = function (matrix) {
+					return this.toString() === matrix.toString();
+				};
+
+				Matrix4D.prototype.identity = function () {
+					this.setArray([ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 ]);
+					return this;
+				};
+
+				Matrix4D.prototype.multiply = function (matrix) {
+					var i, j, k, res, value, _i, _j, _k;
+					res = new Matrix4D;
+					for (i = _i = 0; _i < 4; i = ++_i) {
+						for (j = _j = 0; _j < 4; j = ++_j) {
+							for (k = _k = 0; _k < 4; k = ++_k) {
+								value = res.get(i, j) + this.get(i, k) * matrix.get(k, j);
+								res.set(i, j, value);
+							}
+						}
+					}
+					return this.copy(res);
+				};
+
+				Matrix4D.prototype.transpose = function () {
+					var a;
+					a = this.getArray();
+					this.setArray([ a[ 0 ], a[ 4 ], a[ 8 ], a[ 12 ], a[ 1 ], a[ 5 ], a[ 9 ], a[ 13 ], a[ 2 ], a[ 6 ], a[ 10 ], a[ 14 ], a[ 3 ], a[ 7 ], a[ 11 ], a[ 15 ] ]);
+					return this;
+				};
+
+				Matrix4D.prototype.get = function (row, column) {
+					return this.getArray()[ row * 4 + column ];
+				};
+
+				Matrix4D.prototype.set = function (row, column, value) {
+					return this._array[ row * 4 + column ] = value;
+				};
+
+				Matrix4D.prototype.copy = function (matrix) {
+					this._array = matrix.getArray();
+					return this;
+				};
+
+				Matrix4D.prototype.clone = function () {
+					return new Matrix4D(this.getArray());
+				};
+
+				Matrix4D.prototype.getArray = function () {
+					return this._array.slice(0);
+				};
+
+				Matrix4D.prototype.setArray = function (array) {
+					this._array = array;
+					return this;
+				};
+
+				Matrix4D.prototype.toString = function () {
+					return "(" + (this.getArray().join(", ")) + ")";
+				};
+
+				Matrix4D.prototype.toFixed = function (n) {
+					var value;
+					this._array = (function () {
+						var _i, _len, _ref, _results;
+						_ref = this._array;
+						_results = [];
+						for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+							value = _ref[ _i ];
+							_results.push(parseFloat(value.toFixed(n)));
+						}
+						return _results;
+					}).call(this);
+					return this;
+				};
+
+				return Matrix4D;
+
+			})();
+
+			module.exports = Matrix4D;
+
+
+		}, {} ],
+		14:                                                                       [ function (_dereq_, module, exports) {
+			var Vector2D;
+
+			Vector2D = (function () {
+				Vector2D.prototype.x = 0;
+
+				Vector2D.prototype.y = 0;
+
+				function Vector2D (x, y) {
+					this.x = x != null ? x : 0;
+					this.y = y != null ? y : 0;
+				}
+
+				Vector2D.prototype.add = function (vector) {
+					if (!Vector2D.isVector2D(vector)) {
+						return this._addScalar(vector);
+					}
+					this.x += vector.x;
+					this.y += vector.y;
+					return this;
+				};
+
+				Vector2D.prototype._addScalar = function (n) {
+					this.x += n;
+					this.y += n;
+					return this;
+				};
+
+				Vector2D.prototype.subtract = function (vector) {
+					if (!Vector2D.isVector2D(vector)) {
+						return this._subtractScalar(vector);
+					}
+					this.x -= vector.x;
+					this.y -= vector.y;
+					return this;
+				};
+
+				Vector2D.prototype._subtractScalar = function (n) {
+					return this._addScalar(-n);
+				};
+
+				Vector2D.prototype.multiply = function (vector) {
+					if (!Vector2D.isVector2D(vector)) {
+						return this._multiplyScalar(vector);
+					}
+					this.x *= vector.x;
+					this.y *= vector.y;
+					return this;
+				};
+
+				Vector2D.prototype._multiplyScalar = function (n) {
+					this.x *= n;
+					this.y *= n;
+					return this;
+				};
+
+				Vector2D.prototype.divide = function (vector) {
+					if (!Vector2D.isVector2D(vector)) {
+						return this._divideScalar(vector);
+					}
+					this.x /= vector.x;
+					this.y /= vector.y;
+					return this;
+				};
+
+				Vector2D.prototype._divideScalar = function (n) {
+					return this._multiplyScalar(1 / n);
+				};
+
+				Vector2D.prototype.clone = function () {
+					return new Vector2D(this.x, this.y);
+				};
+
+				Vector2D.prototype.copy = function (vector) {
+					this.x = vector.x;
+					this.y = vector.y;
+					return this;
+				};
+
+				Vector2D.prototype.equals = function (vector) {
+					return vector.x === this.x && vector.y === this.y;
+				};
+
+				Vector2D.prototype.toString = function () {
+					return "(" + this.x + ", " + this.y + ")";
+				};
+
+				Vector2D.prototype.toFixed = function (n) {
+					this.x = parseFloat(this.x.toFixed(n));
+					this.y = parseFloat(this.y.toFixed(n));
+					return this;
+				};
+
+				Vector2D.prototype.toArray = function () {
+					return [ this.x, this.y ];
+				};
+
+				Vector2D.isVector2D = function (item) {
+					return item instanceof Vector2D;
+				};
+
+				return Vector2D;
+
+			})();
+
+			module.exports = Vector2D;
+
+
+		}, {} ]
+	}, {}, [ 11 ])
+	(11)
+});
+;
+/*!
+ * jQuery Validation Plugin v1.14.0
+ *
+ * http://jqueryvalidation.org/
+ *
+ * Copyright (c) 2015 Jörn Zaefferer
+ * Released under the MIT license
+ */
+(function( factory ) {
+	if ( typeof define === "function" && define.amd ) {
+		define( ["jquery"], factory );
+	} else {
+		factory( jQuery );
+	}
+}(function( $ ) {
+
+$.extend($.fn, {
+	// http://jqueryvalidation.org/validate/
+	validate: function( options ) {
+
+		// if nothing is selected, return nothing; can't chain anyway
+		if ( !this.length ) {
+			if ( options && options.debug && window.console ) {
+				console.warn( "Nothing selected, can't validate, returning nothing." );
+			}
+			return;
+		}
+
+		// check if a validator for this form was already created
+		var validator = $.data( this[ 0 ], "validator" );
+		if ( validator ) {
+			return validator;
+		}
+
+		// Add novalidate tag if HTML5.
+		this.attr( "novalidate", "novalidate" );
+
+		validator = new $.validator( options, this[ 0 ] );
+		$.data( this[ 0 ], "validator", validator );
+
+		if ( validator.settings.onsubmit ) {
+
+			this.on( "click.validate", ":submit", function( event ) {
+				if ( validator.settings.submitHandler ) {
+					validator.submitButton = event.target;
+				}
+
+				// allow suppressing validation by adding a cancel class to the submit button
+				if ( $( this ).hasClass( "cancel" ) ) {
+					validator.cancelSubmit = true;
+				}
+
+				// allow suppressing validation by adding the html5 formnovalidate attribute to the submit button
+				if ( $( this ).attr( "formnovalidate" ) !== undefined ) {
+					validator.cancelSubmit = true;
+				}
+			});
+
+			// validate the form on submit
+			this.on( "submit.validate", function( event ) {
+				if ( validator.settings.debug ) {
+					// prevent form submit to be able to see console output
+					event.preventDefault();
+				}
+				function handle() {
+					var hidden, result;
+					if ( validator.settings.submitHandler ) {
+						if ( validator.submitButton ) {
+							// insert a hidden input as a replacement for the missing submit button
+							hidden = $( "<input type='hidden'/>" )
+								.attr( "name", validator.submitButton.name )
+								.val( $( validator.submitButton ).val() )
+								.appendTo( validator.currentForm );
+						}
+						result = validator.settings.submitHandler.call( validator, validator.currentForm, event );
+						if ( validator.submitButton ) {
+							// and clean up afterwards; thanks to no-block-scope, hidden can be referenced
+							hidden.remove();
+						}
+						if ( result !== undefined ) {
+							return result;
+						}
+						return false;
+					}
+					return true;
+				}
+
+				// prevent submit for invalid forms or custom submit handlers
+				if ( validator.cancelSubmit ) {
+					validator.cancelSubmit = false;
+					return handle();
+				}
+				if ( validator.form() ) {
+					if ( validator.pendingRequest ) {
+						validator.formSubmitted = true;
+						return false;
+					}
+					return handle();
+				} else {
+					validator.focusInvalid();
+					return false;
+				}
+			});
+		}
+
+		return validator;
+	},
+	// http://jqueryvalidation.org/valid/
+	valid: function() {
+		var valid, validator, errorList;
+
+		if ( $( this[ 0 ] ).is( "form" ) ) {
+			valid = this.validate().form();
+		} else {
+			errorList = [];
+			valid = true;
+			validator = $( this[ 0 ].form ).validate();
+			this.each( function() {
+				valid = validator.element( this ) && valid;
+				errorList = errorList.concat( validator.errorList );
+			});
+			validator.errorList = errorList;
+		}
+		return valid;
+	},
+
+	// http://jqueryvalidation.org/rules/
+	rules: function( command, argument ) {
+		var element = this[ 0 ],
+			settings, staticRules, existingRules, data, param, filtered;
+
+		if ( command ) {
+			settings = $.data( element.form, "validator" ).settings;
+			staticRules = settings.rules;
+			existingRules = $.validator.staticRules( element );
+			switch ( command ) {
+			case "add":
+				$.extend( existingRules, $.validator.normalizeRule( argument ) );
+				// remove messages from rules, but allow them to be set separately
+				delete existingRules.messages;
+				staticRules[ element.name ] = existingRules;
+				if ( argument.messages ) {
+					settings.messages[ element.name ] = $.extend( settings.messages[ element.name ], argument.messages );
+				}
+				break;
+			case "remove":
+				if ( !argument ) {
+					delete staticRules[ element.name ];
+					return existingRules;
+				}
+				filtered = {};
+				$.each( argument.split( /\s/ ), function( index, method ) {
+					filtered[ method ] = existingRules[ method ];
+					delete existingRules[ method ];
+					if ( method === "required" ) {
+						$( element ).removeAttr( "aria-required" );
+					}
+				});
+				return filtered;
+			}
+		}
+
+		data = $.validator.normalizeRules(
+		$.extend(
+			{},
+			$.validator.classRules( element ),
+			$.validator.attributeRules( element ),
+			$.validator.dataRules( element ),
+			$.validator.staticRules( element )
+		), element );
+
+		// make sure required is at front
+		if ( data.required ) {
+			param = data.required;
+			delete data.required;
+			data = $.extend( { required: param }, data );
+			$( element ).attr( "aria-required", "true" );
+		}
+
+		// make sure remote is at back
+		if ( data.remote ) {
+			param = data.remote;
+			delete data.remote;
+			data = $.extend( data, { remote: param });
+		}
+
+		return data;
+	}
+});
+
+// Custom selectors
+$.extend( $.expr[ ":" ], {
+	// http://jqueryvalidation.org/blank-selector/
+	blank: function( a ) {
+		return !$.trim( "" + $( a ).val() );
+	},
+	// http://jqueryvalidation.org/filled-selector/
+	filled: function( a ) {
+		return !!$.trim( "" + $( a ).val() );
+	},
+	// http://jqueryvalidation.org/unchecked-selector/
+	unchecked: function( a ) {
+		return !$( a ).prop( "checked" );
+	}
+});
+
+// constructor for validator
+$.validator = function( options, form ) {
+	this.settings = $.extend( true, {}, $.validator.defaults, options );
+	this.currentForm = form;
+	this.init();
 };
 
-Component = (function() {
-  Component.prototype.easing = "bounce";
-
-  Component.prototype.duration = 1000;
-
-  Component.prototype.delay = 0;
-
-  Component.prototype.from = null;
-
-  Component.prototype.to = null;
-
-  function Component(options) {
-    options || (options = {});
-    if (options.easing != null) {
-      this.easing = options.easing;
-    }
-    if (options.duration != null) {
-      this.duration = options.duration;
-    }
-    if (options.delay != null) {
-      this.delay = options.delay;
-    }
-    if (options.from != null) {
-      this.from = options.from;
-    }
-    if (options.to != null) {
-      this.to = options.to;
-    }
-    this.easingObject = new EasingClasses[this.easing](options);
-  }
-
-  Component.prototype.calculateEase = function(ratio) {
-    return this.easingObject.calculate(ratio);
-  };
-
-  Component.prototype.getMatrix = function() {
-    return new Matrix4D().identity();
-  };
-
-  Component.prototype.getEasedMatrix = function(ratio) {
-    return this.getMatrix();
-  };
-
-  Component.prototype.serialize = function() {
-    var key, serialized, value, _ref;
-    serialized = {
-      type: this.constructor.name.toLowerCase(),
-      easing: this.easing,
-      duration: this.duration,
-      delay: this.delay,
-      from: this.from,
-      to: this.to
-    };
-    _ref = this.easingObject.serialize();
-    for (key in _ref) {
-      value = _ref[key];
-      serialized[key] = value;
-    }
-    return serialized;
-  };
-
-  return Component;
-
-})();
-
-module.exports = Component;
-
-
-},{"../easing/bounce":6,"../easing/hardbounce":7,"../easing/hardsway":8,"../easing/sway":10,"../math/matrix4d":13}],2:[function(_dereq_,module,exports){
-var Component, Matrix4D, Rotate, Vector2D,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Matrix4D = _dereq_("../math/matrix4d");
-
-Vector2D = _dereq_("../math/vector2d");
-
-Component = _dereq_("./index");
-
-Rotate = (function(_super) {
-  __extends(Rotate, _super);
-
-  Rotate.prototype.from = 0;
-
-  Rotate.prototype.to = 90;
-
-  function Rotate() {
-    Rotate.__super__.constructor.apply(this, arguments);
-    this.diff = this.to - this.from;
-  }
-
-  Rotate.prototype.getMatrix = function(degrees) {
-    var c, radians, s;
-    radians = (degrees / 180) * Math.PI;
-    c = Math.cos(radians);
-    s = Math.sin(radians);
-    return new Matrix4D([c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-  };
-
-  Rotate.prototype.getEasedMatrix = function(ratio) {
-    var easedAngle, easedRatio;
-    easedRatio = this.calculateEase(ratio);
-    easedAngle = this.from + this.diff * easedRatio;
-    return this.getMatrix(easedAngle);
-  };
-
-  return Rotate;
-
-})(Component);
-
-module.exports = Rotate;
-
-
-},{"../math/matrix4d":13,"../math/vector2d":14,"./index":1}],3:[function(_dereq_,module,exports){
-var Component, Matrix4D, Scale, Vector2D,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Matrix4D = _dereq_("../math/matrix4d");
-
-Vector2D = _dereq_("../math/vector2d");
-
-Component = _dereq_("./index");
-
-Scale = (function(_super) {
-  __extends(Scale, _super);
-
-  Scale.prototype.from = {
-    x: 0.5,
-    y: 0.5
-  };
-
-  Scale.prototype.to = {
-    x: 1,
-    y: 1
-  };
-
-  function Scale() {
-    Scale.__super__.constructor.apply(this, arguments);
-    this.fromVector = new Vector2D(this.from.x, this.from.y);
-    this.toVector = new Vector2D(this.to.x, this.to.y);
-    this.diff = this.toVector.clone().subtract(this.fromVector);
-  }
-
-  Scale.prototype.getMatrix = function(x, y) {
-    var z;
-    z = 1;
-    return new Matrix4D([x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1]);
-  };
-
-  Scale.prototype.getEasedMatrix = function(ratio) {
-    var easedRatio, easedVector;
-    easedRatio = this.calculateEase(ratio);
-    easedVector = this.fromVector.clone().add(this.diff.clone().multiply(easedRatio));
-    return this.getMatrix(easedVector.x, easedVector.y);
-  };
-
-  return Scale;
-
-})(Component);
-
-module.exports = Scale;
-
-
-},{"../math/matrix4d":13,"../math/vector2d":14,"./index":1}],4:[function(_dereq_,module,exports){
-var Component, Matrix4D, Skew, Vector2D,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Matrix4D = _dereq_("../math/matrix4d");
-
-Vector2D = _dereq_("../math/vector2d");
-
-Component = _dereq_("./index");
-
-Skew = (function(_super) {
-  __extends(Skew, _super);
-
-  Skew.prototype.from = {
-    x: 0,
-    y: 0
-  };
-
-  Skew.prototype.to = {
-    x: 20,
-    y: 0
-  };
-
-  function Skew() {
-    Skew.__super__.constructor.apply(this, arguments);
-    this.fromVector = new Vector2D(this.from.x, this.from.y);
-    this.toVector = new Vector2D(this.to.x, this.to.y);
-    this.diff = this.toVector.clone().subtract(this.fromVector);
-  }
-
-  Skew.prototype.getMatrix = function(degreesX, degreesY) {
-    var radiansX, radiansY, tx, ty;
-    radiansX = (degreesX / 180) * Math.PI;
-    radiansY = (degreesY / 180) * Math.PI;
-    tx = Math.tan(radiansX);
-    ty = Math.tan(radiansY);
-    return new Matrix4D([1, tx, 0, 0, ty, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-  };
-
-  Skew.prototype.getEasedMatrix = function(ratio) {
-    var easedRatio, easedVector;
-    easedRatio = this.calculateEase(ratio);
-    easedVector = this.fromVector.clone().add(this.diff.clone().multiply(easedRatio));
-    return this.getMatrix(easedVector.x, easedVector.y);
-  };
-
-  return Skew;
-
-})(Component);
-
-module.exports = Skew;
-
-
-},{"../math/matrix4d":13,"../math/vector2d":14,"./index":1}],5:[function(_dereq_,module,exports){
-var Component, Matrix4D, Translate, Vector2D,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Matrix4D = _dereq_("../math/matrix4d");
-
-Vector2D = _dereq_("../math/vector2d");
-
-Component = _dereq_("./index");
-
-Translate = (function(_super) {
-  __extends(Translate, _super);
-
-  Translate.prototype.from = {
-    x: 0,
-    y: 0
-  };
-
-  Translate.prototype.to = {
-    x: 0,
-    y: 0
-  };
-
-  function Translate() {
-    Translate.__super__.constructor.apply(this, arguments);
-    this.fromVector = new Vector2D(this.from.x, this.from.y);
-    this.toVector = new Vector2D(this.to.x, this.to.y);
-    this.diff = this.toVector.clone().subtract(this.fromVector);
-  }
-
-  Translate.prototype.getMatrix = function(x, y) {
-    var z;
-    z = 0;
-    return new Matrix4D([1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1]);
-  };
-
-  Translate.prototype.getEasedMatrix = function(ratio) {
-    var easedRatio, easedVector;
-    easedRatio = this.calculateEase(ratio);
-    easedVector = this.fromVector.clone().add(this.diff.clone().multiply(easedRatio));
-    return this.getMatrix(easedVector.x, easedVector.y);
-  };
-
-  return Translate;
-
-})(Component);
-
-module.exports = Translate;
-
-
-},{"../math/matrix4d":13,"../math/vector2d":14,"./index":1}],6:[function(_dereq_,module,exports){
-var BounceEasing, Easing,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Easing = _dereq_("./index");
-
-BounceEasing = (function(_super) {
-  __extends(BounceEasing, _super);
-
-  BounceEasing.prototype.bounces = 4;
-
-  BounceEasing.prototype.stiffness = 3;
-
-  function BounceEasing(options) {
-    var threshold;
-    if (options == null) {
-      options = {};
-    }
-    BounceEasing.__super__.constructor.apply(this, arguments);
-    if (options.stiffness != null) {
-      this.stiffness = options.stiffness;
-    }
-    if (options.bounces != null) {
-      this.bounces = options.bounces;
-    }
-    this.alpha = this.stiffness / 100;
-    threshold = 0.005 / Math.pow(10, this.stiffness);
-    this.limit = Math.floor(Math.log(threshold) / -this.alpha);
-    this.omega = this.calculateOmega(this.bounces, this.limit);
-  }
-
-  BounceEasing.prototype.calculate = function(ratio) {
-    var t;
-    if (ratio >= 1) {
-      return 1;
-    }
-    t = ratio * this.limit;
-    return 1 - this.exponent(t) * this.oscillation(t);
-  };
-
-  BounceEasing.prototype.calculateOmega = function(bounces, limit) {
-    return (this.bounces + 0.5) * Math.PI / this.limit;
-  };
-
-  BounceEasing.prototype.exponent = function(t) {
-    return Math.pow(Math.E, -this.alpha * t);
-  };
-
-  BounceEasing.prototype.oscillation = function(t) {
-    return Math.cos(this.omega * t);
-  };
-
-  BounceEasing.prototype.serialize = function() {
-    return {
-      stiffness: this.stiffness,
-      bounces: this.bounces
-    };
-  };
-
-  return BounceEasing;
-
-})(Easing);
-
-module.exports = BounceEasing;
-
-
-},{"./index":9}],7:[function(_dereq_,module,exports){
-var BounceEasing, HardBounceEasing,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BounceEasing = _dereq_("./bounce");
-
-HardBounceEasing = (function(_super) {
-  __extends(HardBounceEasing, _super);
-
-  function HardBounceEasing() {
-    return HardBounceEasing.__super__.constructor.apply(this, arguments);
-  }
-
-  HardBounceEasing.prototype.oscillation = function(t) {
-    return Math.abs(Math.cos(this.omega * t));
-  };
-
-  return HardBounceEasing;
-
-})(BounceEasing);
-
-module.exports = HardBounceEasing;
-
-
-},{"./bounce":6}],8:[function(_dereq_,module,exports){
-var HardSwayEasing, SwayEasing,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-SwayEasing = _dereq_("./sway");
-
-HardSwayEasing = (function(_super) {
-  __extends(HardSwayEasing, _super);
-
-  function HardSwayEasing() {
-    return HardSwayEasing.__super__.constructor.apply(this, arguments);
-  }
-
-  HardSwayEasing.prototype.oscillation = function(t) {
-    return Math.abs(Math.sin(this.omega * t));
-  };
-
-  return HardSwayEasing;
-
-})(SwayEasing);
-
-module.exports = HardSwayEasing;
-
-
-},{"./sway":10}],9:[function(_dereq_,module,exports){
-var Easing, MathHelpers;
-
-MathHelpers = _dereq_("../math/helpers");
-
-Easing = (function() {
-  function Easing() {}
-
-  Easing.prototype.calculate = function(ratio) {
-    return ratio;
-  };
-
-  Easing.prototype.serialize = function() {
-    return {};
-  };
-
-  Easing.prototype.findOptimalKeyPoints = function(threshold, resolution) {
-    var area, halfway, i, keyPoint, keyPoints, loops, result, values;
-    if (threshold == null) {
-      threshold = 1.0;
-    }
-    if (resolution == null) {
-      resolution = 1000;
-    }
-    keyPoints = [0];
-    values = (function() {
-      var _i, _results;
-      _results = [];
-      for (i = _i = 0; 0 <= resolution ? _i < resolution : _i > resolution; i = 0 <= resolution ? ++_i : --_i) {
-        _results.push(this.calculate(i / resolution));
-      }
-      return _results;
-    }).call(this);
-    keyPoints = keyPoints.concat(MathHelpers.findTurningPoints(values));
-    keyPoints.push(resolution - 1);
-    i = 0;
-    loops = 1000;
-    while (loops--) {
-      if (i === keyPoints.length - 1) {
-        break;
-      }
-      area = MathHelpers.areaBetweenLineAndCurve(values, keyPoints[i], keyPoints[i + 1]);
-      if (area <= threshold) {
-        i++;
-      } else {
-        halfway = Math.round(keyPoints[i] + (keyPoints[i + 1] - keyPoints[i]) / 2);
-        keyPoints.splice(i + 1, 0, halfway);
-      }
-    }
-    if (loops === 0) {
-      return [];
-    }
-    return result = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = keyPoints.length; _i < _len; _i++) {
-        keyPoint = keyPoints[_i];
-        _results.push(keyPoint / (resolution - 1));
-      }
-      return _results;
-    })();
-  };
-
-  return Easing;
-
-})();
-
-module.exports = Easing;
-
-
-},{"../math/helpers":12}],10:[function(_dereq_,module,exports){
-var BounceEasing, SwayEasing,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-BounceEasing = _dereq_("./bounce");
-
-SwayEasing = (function(_super) {
-  __extends(SwayEasing, _super);
-
-  function SwayEasing() {
-    return SwayEasing.__super__.constructor.apply(this, arguments);
-  }
-
-  SwayEasing.prototype.calculate = function(ratio) {
-    var t;
-    if (ratio >= 1) {
-      return 0;
-    }
-    t = ratio * this.limit;
-    return this.exponent(t) * this.oscillation(t);
-  };
-
-  SwayEasing.prototype.calculateOmega = function(bounces, limit) {
-    return this.bounces * Math.PI / this.limit;
-  };
-
-  SwayEasing.prototype.oscillation = function(t) {
-    return Math.sin(this.omega * t);
-  };
-
-  return SwayEasing;
-
-})(BounceEasing);
-
-module.exports = SwayEasing;
-
-
-},{"./bounce":6}],11:[function(_dereq_,module,exports){
-var Bounce, ComponentClasses, Matrix4D;
-
-Matrix4D = _dereq_("./math/matrix4d");
-
-ComponentClasses = {
-  scale: _dereq_("./components/scale"),
-  rotate: _dereq_("./components/rotate"),
-  translate: _dereq_("./components/translate"),
-  skew: _dereq_("./components/skew")
+// http://jqueryvalidation.org/jQuery.validator.format/
+$.validator.format = function( source, params ) {
+	if ( arguments.length === 1 ) {
+		return function() {
+			var args = $.makeArray( arguments );
+			args.unshift( source );
+			return $.validator.format.apply( this, args );
+		};
+	}
+	if ( arguments.length > 2 && params.constructor !== Array  ) {
+		params = $.makeArray( arguments ).slice( 1 );
+	}
+	if ( params.constructor !== Array ) {
+		params = [ params ];
+	}
+	$.each( params, function( i, n ) {
+		source = source.replace( new RegExp( "\\{" + i + "\\}", "g" ), function() {
+			return n;
+		});
+	});
+	return source;
 };
 
-Bounce = (function() {
-  Bounce.FPS = 30;
-
-  Bounce.counter = 1;
-
-  Bounce.prototype.components = null;
-
-  Bounce.prototype.duration = 0;
-
-  function Bounce() {
-    this.components = [];
-  }
-
-  Bounce.prototype.scale = function(options) {
-    return this.addComponent(new ComponentClasses["scale"](options));
-  };
-
-  Bounce.prototype.rotate = function(options) {
-    return this.addComponent(new ComponentClasses["rotate"](options));
-  };
-
-  Bounce.prototype.translate = function(options) {
-    return this.addComponent(new ComponentClasses["translate"](options));
-  };
-
-  Bounce.prototype.skew = function(options) {
-    return this.addComponent(new ComponentClasses["skew"](options));
-  };
-
-  Bounce.prototype.addComponent = function(component) {
-    this.components.push(component);
-    this.updateDuration();
-    return this;
-  };
-
-  Bounce.prototype.serialize = function() {
-    var component, serialized, _i, _len, _ref;
-    serialized = [];
-    _ref = this.components;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      component = _ref[_i];
-      serialized.push(component.serialize());
-    }
-    return serialized;
-  };
-
-  Bounce.prototype.deserialize = function(serialized) {
-    var options, _i, _len;
-    for (_i = 0, _len = serialized.length; _i < _len; _i++) {
-      options = serialized[_i];
-      this.addComponent(new ComponentClasses[options.type](options));
-    }
-    return this;
-  };
-
-  Bounce.prototype.updateDuration = function() {
-    return this.duration = this.components.map(function(component) {
-      return component.duration + component.delay;
-    }).reduce(function(a, b) {
-      return Math.max(a, b);
-    });
-  };
-
-  Bounce.prototype.define = function(name) {
-    this.name = name || Bounce.generateName();
-    this.styleElement = document.createElement("style");
-    this.styleElement.innerHTML = this.getKeyframeCSS({
-      name: this.name,
-      prefix: true
-    });
-    document.body.appendChild(this.styleElement);
-    return this;
-  };
-
-  Bounce.prototype.applyTo = function(elements, options) {
-    var css, deferred, element, prefix, prefixes, _i, _j, _len, _len1, _ref;
-    if (options == null) {
-      options = {};
-    }
-    this.define();
-    if (!elements.length) {
-      elements = [elements];
-    }
-    prefixes = this.getPrefixes();
-    deferred = null;
-    if (window.jQuery && window.jQuery.Deferred) {
-      deferred = new window.jQuery.Deferred();
-    }
-    for (_i = 0, _len = elements.length; _i < _len; _i++) {
-      element = elements[_i];
-      _ref = prefixes.animation;
-      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-        prefix = _ref[_j];
-        css = [this.name, "" + this.duration + "ms", "linear", "both"];
-        if (options.loop) {
-          css.push("infinite");
-        }
-        element.style["" + prefix + "animation"] = css.join(" ");
-      }
-    }
-    if (!options.loop) {
-      setTimeout(((function(_this) {
-        return function() {
-          if (options.remove) {
-            _this.remove();
-          }
-          if (typeof options.onComplete === "function") {
-            options.onComplete();
-          }
-          if (deferred) {
-            return deferred.resolve();
-          }
-        };
-      })(this)), this.duration);
-    }
-    return deferred;
-  };
-
-  Bounce.prototype.remove = function() {
-    var _ref;
-    if (!this.styleElement) {
-      return;
-    }
-    if (this.styleElement.remove) {
-      return this.styleElement.remove();
-    } else {
-      return (_ref = this.styleElement.parentNode) != null ? _ref.removeChild(this.styleElement) : void 0;
-    }
-  };
-
-  Bounce.prototype.getPrefixes = function(force) {
-    var prefixes, style;
-    prefixes = {
-      transform: [""],
-      animation: [""]
-    };
-    style = document.createElement("dummy").style;
-    if (force || (!("transform" in style) && "webkitTransform" in style)) {
-      prefixes.transform = ["-webkit-", ""];
-    }
-    if (force || (!("animation" in style) && "webkitAnimation" in style)) {
-      prefixes.animation = ["-webkit-", ""];
-    }
-    return prefixes;
-  };
-
-  Bounce.prototype.getKeyframeCSS = function(options) {
-    var animations, key, keyframeList, keyframes, matrix, prefix, prefixes, transformString, transforms, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
-    if (options == null) {
-      options = {};
-    }
-    this.name = options.name || Bounce.generateName();
-    prefixes = {
-      transform: [""],
-      animation: [""]
-    };
-    if (options.prefix || options.forcePrefix) {
-      prefixes = this.getPrefixes(options.forcePrefix);
-    }
-    keyframeList = [];
-    keyframes = this.getKeyframes(options);
-    _ref = this.keys;
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      key = _ref[_i];
-      matrix = keyframes[key];
-      transformString = "matrix3d" + matrix;
-      transforms = [];
-      _ref1 = prefixes.transform;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        prefix = _ref1[_j];
-        transforms.push("" + prefix + "transform: " + transformString + ";");
-      }
-      keyframeList.push("" + (Math.round(key * 100 * 100) / 100) + "% { " + (transforms.join(" ")) + " }");
-    }
-    animations = [];
-    _ref2 = prefixes.animation;
-    for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-      prefix = _ref2[_k];
-      animations.push("@" + prefix + "keyframes " + this.name + " { \n  " + (keyframeList.join("\n  ")) + " \n}");
-    }
-    return animations.join("\n\n");
-  };
-
-  Bounce.prototype.getKeyframes = function(options) {
-    var component, componentKeys, currentTime, frames, i, key, keyframes, keys, matrix, ratio, _i, _j, _k, _l, _len, _len1, _len2, _ref, _ref1;
-    if (options == null) {
-      options = {};
-    }
-    keys = [0, 1];
-    if (options.optimized) {
-      _ref = this.components;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        component = _ref[_i];
-        componentKeys = component.easingObject.findOptimalKeyPoints().map((function(_this) {
-          return function(key) {
-            return (key * component.duration / _this.duration) + (component.delay / _this.duration);
-          };
-        })(this));
-        if (component.delay) {
-          componentKeys.push((component.delay / this.duration) - 0.001);
-        }
-        keys = keys.concat(componentKeys);
-      }
-    } else {
-      frames = Math.round((this.duration / 1000) * Bounce.FPS);
-      for (i = _j = 0; 0 <= frames ? _j <= frames : _j >= frames; i = 0 <= frames ? ++_j : --_j) {
-        keys.push(i / frames);
-      }
-    }
-    keys = keys.sort(function(a, b) {
-      return a - b;
-    });
-    this.keys = [];
-    keyframes = {};
-    for (_k = 0, _len1 = keys.length; _k < _len1; _k++) {
-      key = keys[_k];
-      if (keyframes[key]) {
-        continue;
-      }
-      matrix = new Matrix4D().identity();
-      _ref1 = this.components;
-      for (_l = 0, _len2 = _ref1.length; _l < _len2; _l++) {
-        component = _ref1[_l];
-        currentTime = key * this.duration;
-        if ((component.delay - currentTime) > 1e-8) {
-          continue;
-        }
-        ratio = (key - component.delay / this.duration) / (component.duration / this.duration);
-        matrix.multiply(component.getEasedMatrix(ratio));
-      }
-      this.keys.push(key);
-      keyframes[key] = matrix.transpose().toFixed(3);
-    }
-    return keyframes;
-  };
-
-  Bounce.generateName = function() {
-    return "animation-" + (Bounce.counter++);
-  };
-
-  Bounce.isSupported = function() {
-    var property, propertyIsSupported, propertyList, propertyLists, style, _i, _j, _len, _len1;
-    style = document.createElement("dummy").style;
-    propertyLists = [["transform", "webkitTransform"], ["animation", "webkitAnimation"]];
-    for (_i = 0, _len = propertyLists.length; _i < _len; _i++) {
-      propertyList = propertyLists[_i];
-      propertyIsSupported = false;
-      for (_j = 0, _len1 = propertyList.length; _j < _len1; _j++) {
-        property = propertyList[_j];
-        propertyIsSupported || (propertyIsSupported = property in style);
-      }
-      if (!propertyIsSupported) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  return Bounce;
-
-})();
-
-module.exports = Bounce;
-
-
-},{"./components/rotate":2,"./components/scale":3,"./components/skew":4,"./components/translate":5,"./math/matrix4d":13}],12:[function(_dereq_,module,exports){
-var MathHelpers;
-
-MathHelpers = (function() {
-  function MathHelpers() {}
-
-  MathHelpers.prototype.sign = function(value) {
-    if (value < 0) {
-      return -1;
-    }
-    return 1;
-  };
-
-  MathHelpers.prototype.findTurningPoints = function(values) {
-    var i, signA, signB, turningPoints, _i, _ref;
-    turningPoints = [];
-    for (i = _i = 1, _ref = values.length - 1; 1 <= _ref ? _i < _ref : _i > _ref; i = 1 <= _ref ? ++_i : --_i) {
-      signA = this.sign(values[i] - values[i - 1]);
-      signB = this.sign(values[i + 1] - values[i]);
-      if (signA !== signB) {
-        turningPoints.push(i);
-      }
-    }
-    return turningPoints;
-  };
-
-  MathHelpers.prototype.areaBetweenLineAndCurve = function(values, start, end) {
-    var area, curveValue, i, length, lineValue, yEnd, yStart, _i;
-    length = end - start;
-    yStart = values[start];
-    yEnd = values[end];
-    area = 0;
-    for (i = _i = 0; 0 <= length ? _i <= length : _i >= length; i = 0 <= length ? ++_i : --_i) {
-      curveValue = values[start + i];
-      lineValue = yStart + (i / length) * (yEnd - yStart);
-      area += Math.abs(lineValue - curveValue);
-    }
-    return area;
-  };
-
-  return MathHelpers;
-
-})();
-
-module.exports = new MathHelpers;
-
-
-},{}],13:[function(_dereq_,module,exports){
-var Matrix4D;
-
-Matrix4D = (function() {
-  Matrix4D.prototype._array = null;
-
-  function Matrix4D(array) {
-    this._array = (array != null ? array.slice(0) : void 0) || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  }
-
-  Matrix4D.prototype.equals = function(matrix) {
-    return this.toString() === matrix.toString();
-  };
-
-  Matrix4D.prototype.identity = function() {
-    this.setArray([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
-    return this;
-  };
-
-  Matrix4D.prototype.multiply = function(matrix) {
-    var i, j, k, res, value, _i, _j, _k;
-    res = new Matrix4D;
-    for (i = _i = 0; _i < 4; i = ++_i) {
-      for (j = _j = 0; _j < 4; j = ++_j) {
-        for (k = _k = 0; _k < 4; k = ++_k) {
-          value = res.get(i, j) + this.get(i, k) * matrix.get(k, j);
-          res.set(i, j, value);
-        }
-      }
-    }
-    return this.copy(res);
-  };
-
-  Matrix4D.prototype.transpose = function() {
-    var a;
-    a = this.getArray();
-    this.setArray([a[0], a[4], a[8], a[12], a[1], a[5], a[9], a[13], a[2], a[6], a[10], a[14], a[3], a[7], a[11], a[15]]);
-    return this;
-  };
-
-  Matrix4D.prototype.get = function(row, column) {
-    return this.getArray()[row * 4 + column];
-  };
-
-  Matrix4D.prototype.set = function(row, column, value) {
-    return this._array[row * 4 + column] = value;
-  };
-
-  Matrix4D.prototype.copy = function(matrix) {
-    this._array = matrix.getArray();
-    return this;
-  };
-
-  Matrix4D.prototype.clone = function() {
-    return new Matrix4D(this.getArray());
-  };
-
-  Matrix4D.prototype.getArray = function() {
-    return this._array.slice(0);
-  };
-
-  Matrix4D.prototype.setArray = function(array) {
-    this._array = array;
-    return this;
-  };
-
-  Matrix4D.prototype.toString = function() {
-    return "(" + (this.getArray().join(", ")) + ")";
-  };
-
-  Matrix4D.prototype.toFixed = function(n) {
-    var value;
-    this._array = (function() {
-      var _i, _len, _ref, _results;
-      _ref = this._array;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        value = _ref[_i];
-        _results.push(parseFloat(value.toFixed(n)));
-      }
-      return _results;
-    }).call(this);
-    return this;
-  };
-
-  return Matrix4D;
-
-})();
-
-module.exports = Matrix4D;
-
-
-},{}],14:[function(_dereq_,module,exports){
-var Vector2D;
-
-Vector2D = (function() {
-  Vector2D.prototype.x = 0;
-
-  Vector2D.prototype.y = 0;
-
-  function Vector2D(x, y) {
-    this.x = x != null ? x : 0;
-    this.y = y != null ? y : 0;
-  }
-
-  Vector2D.prototype.add = function(vector) {
-    if (!Vector2D.isVector2D(vector)) {
-      return this._addScalar(vector);
-    }
-    this.x += vector.x;
-    this.y += vector.y;
-    return this;
-  };
-
-  Vector2D.prototype._addScalar = function(n) {
-    this.x += n;
-    this.y += n;
-    return this;
-  };
-
-  Vector2D.prototype.subtract = function(vector) {
-    if (!Vector2D.isVector2D(vector)) {
-      return this._subtractScalar(vector);
-    }
-    this.x -= vector.x;
-    this.y -= vector.y;
-    return this;
-  };
-
-  Vector2D.prototype._subtractScalar = function(n) {
-    return this._addScalar(-n);
-  };
-
-  Vector2D.prototype.multiply = function(vector) {
-    if (!Vector2D.isVector2D(vector)) {
-      return this._multiplyScalar(vector);
-    }
-    this.x *= vector.x;
-    this.y *= vector.y;
-    return this;
-  };
-
-  Vector2D.prototype._multiplyScalar = function(n) {
-    this.x *= n;
-    this.y *= n;
-    return this;
-  };
-
-  Vector2D.prototype.divide = function(vector) {
-    if (!Vector2D.isVector2D(vector)) {
-      return this._divideScalar(vector);
-    }
-    this.x /= vector.x;
-    this.y /= vector.y;
-    return this;
-  };
-
-  Vector2D.prototype._divideScalar = function(n) {
-    return this._multiplyScalar(1 / n);
-  };
-
-  Vector2D.prototype.clone = function() {
-    return new Vector2D(this.x, this.y);
-  };
-
-  Vector2D.prototype.copy = function(vector) {
-    this.x = vector.x;
-    this.y = vector.y;
-    return this;
-  };
-
-  Vector2D.prototype.equals = function(vector) {
-    return vector.x === this.x && vector.y === this.y;
-  };
-
-  Vector2D.prototype.toString = function() {
-    return "(" + this.x + ", " + this.y + ")";
-  };
-
-  Vector2D.prototype.toFixed = function(n) {
-    this.x = parseFloat(this.x.toFixed(n));
-    this.y = parseFloat(this.y.toFixed(n));
-    return this;
-  };
-
-  Vector2D.prototype.toArray = function() {
-    return [this.x, this.y];
-  };
-
-  Vector2D.isVector2D = function(item) {
-    return item instanceof Vector2D;
-  };
-
-  return Vector2D;
-
-})();
-
-module.exports = Vector2D;
-
-
-},{}]},{},[11])
-(11)
-});;
+$.extend( $.validator, {
+
+	defaults: {
+		messages: {},
+		groups: {},
+		rules: {},
+		errorClass: "error",
+		validClass: "valid",
+		errorElement: "label",
+		focusCleanup: false,
+		focusInvalid: true,
+		errorContainer: $( [] ),
+		errorLabelContainer: $( [] ),
+		onsubmit: true,
+		ignore: ":hidden",
+		ignoreTitle: false,
+		onfocusin: function( element ) {
+			this.lastActive = element;
+
+			// Hide error label and remove error class on focus if enabled
+			if ( this.settings.focusCleanup ) {
+				if ( this.settings.unhighlight ) {
+					this.settings.unhighlight.call( this, element, this.settings.errorClass, this.settings.validClass );
+				}
+				this.hideThese( this.errorsFor( element ) );
+			}
+		},
+		onfocusout: function( element ) {
+			if ( !this.checkable( element ) && ( element.name in this.submitted || !this.optional( element ) ) ) {
+				this.element( element );
+			}
+		},
+		onkeyup: function( element, event ) {
+			// Avoid revalidate the field when pressing one of the following keys
+			// Shift       => 16
+			// Ctrl        => 17
+			// Alt         => 18
+			// Caps lock   => 20
+			// End         => 35
+			// Home        => 36
+			// Left arrow  => 37
+			// Up arrow    => 38
+			// Right arrow => 39
+			// Down arrow  => 40
+			// Insert      => 45
+			// Num lock    => 144
+			// AltGr key   => 225
+			var excludedKeys = [
+				16, 17, 18, 20, 35, 36, 37,
+				38, 39, 40, 45, 144, 225
+			];
+
+			if ( event.which === 9 && this.elementValue( element ) === "" || $.inArray( event.keyCode, excludedKeys ) !== -1 ) {
+				return;
+			} else if ( element.name in this.submitted || element === this.lastElement ) {
+				this.element( element );
+			}
+		},
+		onclick: function( element ) {
+			// click on selects, radiobuttons and checkboxes
+			if ( element.name in this.submitted ) {
+				this.element( element );
+
+			// or option elements, check parent select in that case
+			} else if ( element.parentNode.name in this.submitted ) {
+				this.element( element.parentNode );
+			}
+		},
+		highlight: function( element, errorClass, validClass ) {
+			if ( element.type === "radio" ) {
+				this.findByName( element.name ).addClass( errorClass ).removeClass( validClass );
+			} else {
+				$( element ).addClass( errorClass ).removeClass( validClass );
+			}
+		},
+		unhighlight: function( element, errorClass, validClass ) {
+			if ( element.type === "radio" ) {
+				this.findByName( element.name ).removeClass( errorClass ).addClass( validClass );
+			} else {
+				$( element ).removeClass( errorClass ).addClass( validClass );
+			}
+		}
+	},
+
+	// http://jqueryvalidation.org/jQuery.validator.setDefaults/
+	setDefaults: function( settings ) {
+		$.extend( $.validator.defaults, settings );
+	},
+
+	messages: {
+		required: "This field is required.",
+		remote: "Please fix this field.",
+		email: "Please enter a valid email address.",
+		url: "Please enter a valid URL.",
+		date: "Please enter a valid date.",
+		dateISO: "Please enter a valid date ( ISO ).",
+		number: "Please enter a valid number.",
+		digits: "Please enter only digits.",
+		creditcard: "Please enter a valid credit card number.",
+		equalTo: "Please enter the same value again.",
+		maxlength: $.validator.format( "Please enter no more than {0} characters." ),
+		minlength: $.validator.format( "Please enter at least {0} characters." ),
+		rangelength: $.validator.format( "Please enter a value between {0} and {1} characters long." ),
+		range: $.validator.format( "Please enter a value between {0} and {1}." ),
+		max: $.validator.format( "Please enter a value less than or equal to {0}." ),
+		min: $.validator.format( "Please enter a value greater than or equal to {0}." )
+	},
+
+	autoCreateRanges: false,
+
+	prototype: {
+
+		init: function() {
+			this.labelContainer = $( this.settings.errorLabelContainer );
+			this.errorContext = this.labelContainer.length && this.labelContainer || $( this.currentForm );
+			this.containers = $( this.settings.errorContainer ).add( this.settings.errorLabelContainer );
+			this.submitted = {};
+			this.valueCache = {};
+			this.pendingRequest = 0;
+			this.pending = {};
+			this.invalid = {};
+			this.reset();
+
+			var groups = ( this.groups = {} ),
+				rules;
+			$.each( this.settings.groups, function( key, value ) {
+				if ( typeof value === "string" ) {
+					value = value.split( /\s/ );
+				}
+				$.each( value, function( index, name ) {
+					groups[ name ] = key;
+				});
+			});
+			rules = this.settings.rules;
+			$.each( rules, function( key, value ) {
+				rules[ key ] = $.validator.normalizeRule( value );
+			});
+
+			function delegate( event ) {
+				var validator = $.data( this.form, "validator" ),
+					eventType = "on" + event.type.replace( /^validate/, "" ),
+					settings = validator.settings;
+				if ( settings[ eventType ] && !$( this ).is( settings.ignore ) ) {
+					settings[ eventType ].call( validator, this, event );
+				}
+			}
+
+			$( this.currentForm )
+				.on( "focusin.validate focusout.validate keyup.validate",
+					":text, [type='password'], [type='file'], select, textarea, [type='number'], [type='search'], " +
+					"[type='tel'], [type='url'], [type='email'], [type='datetime'], [type='date'], [type='month'], " +
+					"[type='week'], [type='time'], [type='datetime-local'], [type='range'], [type='color'], " +
+					"[type='radio'], [type='checkbox']", delegate)
+				// Support: Chrome, oldIE
+				// "select" is provided as event.target when clicking a option
+				.on("click.validate", "select, option, [type='radio'], [type='checkbox']", delegate);
+
+			if ( this.settings.invalidHandler ) {
+				$( this.currentForm ).on( "invalid-form.validate", this.settings.invalidHandler );
+			}
+
+			// Add aria-required to any Static/Data/Class required fields before first validation
+			// Screen readers require this attribute to be present before the initial submission http://www.w3.org/TR/WCAG-TECHS/ARIA2.html
+			$( this.currentForm ).find( "[required], [data-rule-required], .required" ).attr( "aria-required", "true" );
+		},
+
+		// http://jqueryvalidation.org/Validator.form/
+		form: function() {
+			this.checkForm();
+			$.extend( this.submitted, this.errorMap );
+			this.invalid = $.extend({}, this.errorMap );
+			if ( !this.valid() ) {
+				$( this.currentForm ).triggerHandler( "invalid-form", [ this ]);
+			}
+			this.showErrors();
+			return this.valid();
+		},
+
+		checkForm: function() {
+			this.prepareForm();
+			for ( var i = 0, elements = ( this.currentElements = this.elements() ); elements[ i ]; i++ ) {
+				this.check( elements[ i ] );
+			}
+			return this.valid();
+		},
+
+		// http://jqueryvalidation.org/Validator.element/
+		element: function( element ) {
+			var cleanElement = this.clean( element ),
+				checkElement = this.validationTargetFor( cleanElement ),
+				result = true;
+
+			this.lastElement = checkElement;
+
+			if ( checkElement === undefined ) {
+				delete this.invalid[ cleanElement.name ];
+			} else {
+				this.prepareElement( checkElement );
+				this.currentElements = $( checkElement );
+
+				result = this.check( checkElement ) !== false;
+				if ( result ) {
+					delete this.invalid[ checkElement.name ];
+				} else {
+					this.invalid[ checkElement.name ] = true;
+				}
+			}
+			// Add aria-invalid status for screen readers
+			$( element ).attr( "aria-invalid", !result );
+
+			if ( !this.numberOfInvalids() ) {
+				// Hide error containers on last error
+				this.toHide = this.toHide.add( this.containers );
+			}
+			this.showErrors();
+			return result;
+		},
+
+		// http://jqueryvalidation.org/Validator.showErrors/
+		showErrors: function( errors ) {
+			if ( errors ) {
+				// add items to error list and map
+				$.extend( this.errorMap, errors );
+				this.errorList = [];
+				for ( var name in errors ) {
+					this.errorList.push({
+						message: errors[ name ],
+						element: this.findByName( name )[ 0 ]
+					});
+				}
+				// remove items from success list
+				this.successList = $.grep( this.successList, function( element ) {
+					return !( element.name in errors );
+				});
+			}
+			if ( this.settings.showErrors ) {
+				this.settings.showErrors.call( this, this.errorMap, this.errorList );
+			} else {
+				this.defaultShowErrors();
+			}
+		},
+
+		// http://jqueryvalidation.org/Validator.resetForm/
+		resetForm: function() {
+			if ( $.fn.resetForm ) {
+				$( this.currentForm ).resetForm();
+			}
+			this.submitted = {};
+			this.lastElement = null;
+			this.prepareForm();
+			this.hideErrors();
+			var i, elements = this.elements()
+				.removeData( "previousValue" )
+				.removeAttr( "aria-invalid" );
+
+			if ( this.settings.unhighlight ) {
+				for ( i = 0; elements[ i ]; i++ ) {
+					this.settings.unhighlight.call( this, elements[ i ],
+						this.settings.errorClass, "" );
+				}
+			} else {
+				elements.removeClass( this.settings.errorClass );
+			}
+		},
+
+		numberOfInvalids: function() {
+			return this.objectLength( this.invalid );
+		},
+
+		objectLength: function( obj ) {
+			/* jshint unused: false */
+			var count = 0,
+				i;
+			for ( i in obj ) {
+				count++;
+			}
+			return count;
+		},
+
+		hideErrors: function() {
+			this.hideThese( this.toHide );
+		},
+
+		hideThese: function( errors ) {
+			errors.not( this.containers ).text( "" );
+			this.addWrapper( errors ).hide();
+		},
+
+		valid: function() {
+			return this.size() === 0;
+		},
+
+		size: function() {
+			return this.errorList.length;
+		},
+
+		focusInvalid: function() {
+			if ( this.settings.focusInvalid ) {
+				try {
+					$( this.findLastActive() || this.errorList.length && this.errorList[ 0 ].element || [])
+					.filter( ":visible" )
+					.focus()
+					// manually trigger focusin event; without it, focusin handler isn't called, findLastActive won't have anything to find
+					.trigger( "focusin" );
+				} catch ( e ) {
+					// ignore IE throwing errors when focusing hidden elements
+				}
+			}
+		},
+
+		findLastActive: function() {
+			var lastActive = this.lastActive;
+			return lastActive && $.grep( this.errorList, function( n ) {
+				return n.element.name === lastActive.name;
+			}).length === 1 && lastActive;
+		},
+
+		elements: function() {
+			var validator = this,
+				rulesCache = {};
+
+			// select all valid inputs inside the form (no submit or reset buttons)
+			return $( this.currentForm )
+			.find( "input, select, textarea" )
+			.not( ":submit, :reset, :image, :disabled" )
+			.not( this.settings.ignore )
+			.filter( function() {
+				if ( !this.name && validator.settings.debug && window.console ) {
+					console.error( "%o has no name assigned", this );
+				}
+
+				// select only the first element for each name, and only those with rules specified
+				if ( this.name in rulesCache || !validator.objectLength( $( this ).rules() ) ) {
+					return false;
+				}
+
+				rulesCache[ this.name ] = true;
+				return true;
+			});
+		},
+
+		clean: function( selector ) {
+			return $( selector )[ 0 ];
+		},
+
+		errors: function() {
+			var errorClass = this.settings.errorClass.split( " " ).join( "." );
+			return $( this.settings.errorElement + "." + errorClass, this.errorContext );
+		},
+
+		reset: function() {
+			this.successList = [];
+			this.errorList = [];
+			this.errorMap = {};
+			this.toShow = $( [] );
+			this.toHide = $( [] );
+			this.currentElements = $( [] );
+		},
+
+		prepareForm: function() {
+			this.reset();
+			this.toHide = this.errors().add( this.containers );
+		},
+
+		prepareElement: function( element ) {
+			this.reset();
+			this.toHide = this.errorsFor( element );
+		},
+
+		elementValue: function( element ) {
+			var val,
+				$element = $( element ),
+				type = element.type;
+
+			if ( type === "radio" || type === "checkbox" ) {
+				return this.findByName( element.name ).filter(":checked").val();
+			} else if ( type === "number" && typeof element.validity !== "undefined" ) {
+				return element.validity.badInput ? false : $element.val();
+			}
+
+			val = $element.val();
+			if ( typeof val === "string" ) {
+				return val.replace(/\r/g, "" );
+			}
+			return val;
+		},
+
+		check: function( element ) {
+			element = this.validationTargetFor( this.clean( element ) );
+
+			var rules = $( element ).rules(),
+				rulesCount = $.map( rules, function( n, i ) {
+					return i;
+				}).length,
+				dependencyMismatch = false,
+				val = this.elementValue( element ),
+				result, method, rule;
+
+			for ( method in rules ) {
+				rule = { method: method, parameters: rules[ method ] };
+				try {
+
+					result = $.validator.methods[ method ].call( this, val, element, rule.parameters );
+
+					// if a method indicates that the field is optional and therefore valid,
+					// don't mark it as valid when there are no other rules
+					if ( result === "dependency-mismatch" && rulesCount === 1 ) {
+						dependencyMismatch = true;
+						continue;
+					}
+					dependencyMismatch = false;
+
+					if ( result === "pending" ) {
+						this.toHide = this.toHide.not( this.errorsFor( element ) );
+						return;
+					}
+
+					if ( !result ) {
+						this.formatAndAdd( element, rule );
+						return false;
+					}
+				} catch ( e ) {
+					if ( this.settings.debug && window.console ) {
+						console.log( "Exception occurred when checking element " + element.id + ", check the '" + rule.method + "' method.", e );
+					}
+					if ( e instanceof TypeError ) {
+						e.message += ".  Exception occurred when checking element " + element.id + ", check the '" + rule.method + "' method.";
+					}
+
+					throw e;
+				}
+			}
+			if ( dependencyMismatch ) {
+				return;
+			}
+			if ( this.objectLength( rules ) ) {
+				this.successList.push( element );
+			}
+			return true;
+		},
+
+		// return the custom message for the given element and validation method
+		// specified in the element's HTML5 data attribute
+		// return the generic message if present and no method specific message is present
+		customDataMessage: function( element, method ) {
+			return $( element ).data( "msg" + method.charAt( 0 ).toUpperCase() +
+				method.substring( 1 ).toLowerCase() ) || $( element ).data( "msg" );
+		},
+
+		// return the custom message for the given element name and validation method
+		customMessage: function( name, method ) {
+			var m = this.settings.messages[ name ];
+			return m && ( m.constructor === String ? m : m[ method ]);
+		},
+
+		// return the first defined argument, allowing empty strings
+		findDefined: function() {
+			for ( var i = 0; i < arguments.length; i++) {
+				if ( arguments[ i ] !== undefined ) {
+					return arguments[ i ];
+				}
+			}
+			return undefined;
+		},
+
+		defaultMessage: function( element, method ) {
+			return this.findDefined(
+				this.customMessage( element.name, method ),
+				this.customDataMessage( element, method ),
+				// title is never undefined, so handle empty string as undefined
+				!this.settings.ignoreTitle && element.title || undefined,
+				$.validator.messages[ method ],
+				"<strong>Warning: No message defined for " + element.name + "</strong>"
+			);
+		},
+
+		formatAndAdd: function( element, rule ) {
+			var message = this.defaultMessage( element, rule.method ),
+				theregex = /\$?\{(\d+)\}/g;
+			if ( typeof message === "function" ) {
+				message = message.call( this, rule.parameters, element );
+			} else if ( theregex.test( message ) ) {
+				message = $.validator.format( message.replace( theregex, "{$1}" ), rule.parameters );
+			}
+			this.errorList.push({
+				message: message,
+				element: element,
+				method: rule.method
+			});
+
+			this.errorMap[ element.name ] = message;
+			this.submitted[ element.name ] = message;
+		},
+
+		addWrapper: function( toToggle ) {
+			if ( this.settings.wrapper ) {
+				toToggle = toToggle.add( toToggle.parent( this.settings.wrapper ) );
+			}
+			return toToggle;
+		},
+
+		defaultShowErrors: function() {
+			var i, elements, error;
+			for ( i = 0; this.errorList[ i ]; i++ ) {
+				error = this.errorList[ i ];
+				if ( this.settings.highlight ) {
+					this.settings.highlight.call( this, error.element, this.settings.errorClass, this.settings.validClass );
+				}
+				this.showLabel( error.element, error.message );
+			}
+			if ( this.errorList.length ) {
+				this.toShow = this.toShow.add( this.containers );
+			}
+			if ( this.settings.success ) {
+				for ( i = 0; this.successList[ i ]; i++ ) {
+					this.showLabel( this.successList[ i ] );
+				}
+			}
+			if ( this.settings.unhighlight ) {
+				for ( i = 0, elements = this.validElements(); elements[ i ]; i++ ) {
+					this.settings.unhighlight.call( this, elements[ i ], this.settings.errorClass, this.settings.validClass );
+				}
+			}
+			this.toHide = this.toHide.not( this.toShow );
+			this.hideErrors();
+			this.addWrapper( this.toShow ).show();
+		},
+
+		validElements: function() {
+			return this.currentElements.not( this.invalidElements() );
+		},
+
+		invalidElements: function() {
+			return $( this.errorList ).map(function() {
+				return this.element;
+			});
+		},
+
+		showLabel: function( element, message ) {
+			var place, group, errorID,
+				error = this.errorsFor( element ),
+				elementID = this.idOrName( element ),
+				describedBy = $( element ).attr( "aria-describedby" );
+			if ( error.length ) {
+				// refresh error/success class
+				error.removeClass( this.settings.validClass ).addClass( this.settings.errorClass );
+				// replace message on existing label
+				error.html( message );
+			} else {
+				// create error element
+				error = $( "<" + this.settings.errorElement + ">" )
+					.attr( "id", elementID + "-error" )
+					.addClass( this.settings.errorClass )
+					.html( message || "" );
+
+				// Maintain reference to the element to be placed into the DOM
+				place = error;
+				if ( this.settings.wrapper ) {
+					// make sure the element is visible, even in IE
+					// actually showing the wrapped element is handled elsewhere
+					place = error.hide().show().wrap( "<" + this.settings.wrapper + "/>" ).parent();
+				}
+				if ( this.labelContainer.length ) {
+					this.labelContainer.append( place );
+				} else if ( this.settings.errorPlacement ) {
+					this.settings.errorPlacement( place, $( element ) );
+				} else {
+					place.insertAfter( element );
+				}
+
+				// Link error back to the element
+				if ( error.is( "label" ) ) {
+					// If the error is a label, then associate using 'for'
+					error.attr( "for", elementID );
+				} else if ( error.parents( "label[for='" + elementID + "']" ).length === 0 ) {
+					// If the element is not a child of an associated label, then it's necessary
+					// to explicitly apply aria-describedby
+
+					errorID = error.attr( "id" ).replace( /(:|\.|\[|\]|\$)/g, "\\$1");
+					// Respect existing non-error aria-describedby
+					if ( !describedBy ) {
+						describedBy = errorID;
+					} else if ( !describedBy.match( new RegExp( "\\b" + errorID + "\\b" ) ) ) {
+						// Add to end of list if not already present
+						describedBy += " " + errorID;
+					}
+					$( element ).attr( "aria-describedby", describedBy );
+
+					// If this element is grouped, then assign to all elements in the same group
+					group = this.groups[ element.name ];
+					if ( group ) {
+						$.each( this.groups, function( name, testgroup ) {
+							if ( testgroup === group ) {
+								$( "[name='" + name + "']", this.currentForm )
+									.attr( "aria-describedby", error.attr( "id" ) );
+							}
+						});
+					}
+				}
+			}
+			if ( !message && this.settings.success ) {
+				error.text( "" );
+				if ( typeof this.settings.success === "string" ) {
+					error.addClass( this.settings.success );
+				} else {
+					this.settings.success( error, element );
+				}
+			}
+			this.toShow = this.toShow.add( error );
+		},
+
+		errorsFor: function( element ) {
+			var name = this.idOrName( element ),
+				describer = $( element ).attr( "aria-describedby" ),
+				selector = "label[for='" + name + "'], label[for='" + name + "'] *";
+
+			// aria-describedby should directly reference the error element
+			if ( describer ) {
+				selector = selector + ", #" + describer.replace( /\s+/g, ", #" );
+			}
+			return this
+				.errors()
+				.filter( selector );
+		},
+
+		idOrName: function( element ) {
+			return this.groups[ element.name ] || ( this.checkable( element ) ? element.name : element.id || element.name );
+		},
+
+		validationTargetFor: function( element ) {
+
+			// If radio/checkbox, validate first element in group instead
+			if ( this.checkable( element ) ) {
+				element = this.findByName( element.name );
+			}
+
+			// Always apply ignore filter
+			return $( element ).not( this.settings.ignore )[ 0 ];
+		},
+
+		checkable: function( element ) {
+			return ( /radio|checkbox/i ).test( element.type );
+		},
+
+		findByName: function( name ) {
+			return $( this.currentForm ).find( "[name='" + name + "']" );
+		},
+
+		getLength: function( value, element ) {
+			switch ( element.nodeName.toLowerCase() ) {
+			case "select":
+				return $( "option:selected", element ).length;
+			case "input":
+				if ( this.checkable( element ) ) {
+					return this.findByName( element.name ).filter( ":checked" ).length;
+				}
+			}
+			return value.length;
+		},
+
+		depend: function( param, element ) {
+			return this.dependTypes[typeof param] ? this.dependTypes[typeof param]( param, element ) : true;
+		},
+
+		dependTypes: {
+			"boolean": function( param ) {
+				return param;
+			},
+			"string": function( param, element ) {
+				return !!$( param, element.form ).length;
+			},
+			"function": function( param, element ) {
+				return param( element );
+			}
+		},
+
+		optional: function( element ) {
+			var val = this.elementValue( element );
+			return !$.validator.methods.required.call( this, val, element ) && "dependency-mismatch";
+		},
+
+		startRequest: function( element ) {
+			if ( !this.pending[ element.name ] ) {
+				this.pendingRequest++;
+				this.pending[ element.name ] = true;
+			}
+		},
+
+		stopRequest: function( element, valid ) {
+			this.pendingRequest--;
+			// sometimes synchronization fails, make sure pendingRequest is never < 0
+			if ( this.pendingRequest < 0 ) {
+				this.pendingRequest = 0;
+			}
+			delete this.pending[ element.name ];
+			if ( valid && this.pendingRequest === 0 && this.formSubmitted && this.form() ) {
+				$( this.currentForm ).submit();
+				this.formSubmitted = false;
+			} else if (!valid && this.pendingRequest === 0 && this.formSubmitted ) {
+				$( this.currentForm ).triggerHandler( "invalid-form", [ this ]);
+				this.formSubmitted = false;
+			}
+		},
+
+		previousValue: function( element ) {
+			return $.data( element, "previousValue" ) || $.data( element, "previousValue", {
+				old: null,
+				valid: true,
+				message: this.defaultMessage( element, "remote" )
+			});
+		},
+
+		// cleans up all forms and elements, removes validator-specific events
+		destroy: function() {
+			this.resetForm();
+
+			$( this.currentForm )
+				.off( ".validate" )
+				.removeData( "validator" );
+		}
+
+	},
+
+	classRuleSettings: {
+		required: { required: true },
+		email: { email: true },
+		url: { url: true },
+		date: { date: true },
+		dateISO: { dateISO: true },
+		number: { number: true },
+		digits: { digits: true },
+		creditcard: { creditcard: true }
+	},
+
+	addClassRules: function( className, rules ) {
+		if ( className.constructor === String ) {
+			this.classRuleSettings[ className ] = rules;
+		} else {
+			$.extend( this.classRuleSettings, className );
+		}
+	},
+
+	classRules: function( element ) {
+		var rules = {},
+			classes = $( element ).attr( "class" );
+
+		if ( classes ) {
+			$.each( classes.split( " " ), function() {
+				if ( this in $.validator.classRuleSettings ) {
+					$.extend( rules, $.validator.classRuleSettings[ this ]);
+				}
+			});
+		}
+		return rules;
+	},
+
+	normalizeAttributeRule: function( rules, type, method, value ) {
+
+		// convert the value to a number for number inputs, and for text for backwards compability
+		// allows type="date" and others to be compared as strings
+		if ( /min|max/.test( method ) && ( type === null || /number|range|text/.test( type ) ) ) {
+			value = Number( value );
+
+			// Support Opera Mini, which returns NaN for undefined minlength
+			if ( isNaN( value ) ) {
+				value = undefined;
+			}
+		}
+
+		if ( value || value === 0 ) {
+			rules[ method ] = value;
+		} else if ( type === method && type !== "range" ) {
+
+			// exception: the jquery validate 'range' method
+			// does not test for the html5 'range' type
+			rules[ method ] = true;
+		}
+	},
+
+	attributeRules: function( element ) {
+		var rules = {},
+			$element = $( element ),
+			type = element.getAttribute( "type" ),
+			method, value;
+
+		for ( method in $.validator.methods ) {
+
+			// support for <input required> in both html5 and older browsers
+			if ( method === "required" ) {
+				value = element.getAttribute( method );
+
+				// Some browsers return an empty string for the required attribute
+				// and non-HTML5 browsers might have required="" markup
+				if ( value === "" ) {
+					value = true;
+				}
+
+				// force non-HTML5 browsers to return bool
+				value = !!value;
+			} else {
+				value = $element.attr( method );
+			}
+
+			this.normalizeAttributeRule( rules, type, method, value );
+		}
+
+		// maxlength may be returned as -1, 2147483647 ( IE ) and 524288 ( safari ) for text inputs
+		if ( rules.maxlength && /-1|2147483647|524288/.test( rules.maxlength ) ) {
+			delete rules.maxlength;
+		}
+
+		return rules;
+	},
+
+	dataRules: function( element ) {
+		var rules = {},
+			$element = $( element ),
+			type = element.getAttribute( "type" ),
+			method, value;
+
+		for ( method in $.validator.methods ) {
+			value = $element.data( "rule" + method.charAt( 0 ).toUpperCase() + method.substring( 1 ).toLowerCase() );
+			this.normalizeAttributeRule( rules, type, method, value );
+		}
+		return rules;
+	},
+
+	staticRules: function( element ) {
+		var rules = {},
+			validator = $.data( element.form, "validator" );
+
+		if ( validator.settings.rules ) {
+			rules = $.validator.normalizeRule( validator.settings.rules[ element.name ] ) || {};
+		}
+		return rules;
+	},
+
+	normalizeRules: function( rules, element ) {
+		// handle dependency check
+		$.each( rules, function( prop, val ) {
+			// ignore rule when param is explicitly false, eg. required:false
+			if ( val === false ) {
+				delete rules[ prop ];
+				return;
+			}
+			if ( val.param || val.depends ) {
+				var keepRule = true;
+				switch ( typeof val.depends ) {
+				case "string":
+					keepRule = !!$( val.depends, element.form ).length;
+					break;
+				case "function":
+					keepRule = val.depends.call( element, element );
+					break;
+				}
+				if ( keepRule ) {
+					rules[ prop ] = val.param !== undefined ? val.param : true;
+				} else {
+					delete rules[ prop ];
+				}
+			}
+		});
+
+		// evaluate parameters
+		$.each( rules, function( rule, parameter ) {
+			rules[ rule ] = $.isFunction( parameter ) ? parameter( element ) : parameter;
+		});
+
+		// clean number parameters
+		$.each([ "minlength", "maxlength" ], function() {
+			if ( rules[ this ] ) {
+				rules[ this ] = Number( rules[ this ] );
+			}
+		});
+		$.each([ "rangelength", "range" ], function() {
+			var parts;
+			if ( rules[ this ] ) {
+				if ( $.isArray( rules[ this ] ) ) {
+					rules[ this ] = [ Number( rules[ this ][ 0 ]), Number( rules[ this ][ 1 ] ) ];
+				} else if ( typeof rules[ this ] === "string" ) {
+					parts = rules[ this ].replace(/[\[\]]/g, "" ).split( /[\s,]+/ );
+					rules[ this ] = [ Number( parts[ 0 ]), Number( parts[ 1 ] ) ];
+				}
+			}
+		});
+
+		if ( $.validator.autoCreateRanges ) {
+			// auto-create ranges
+			if ( rules.min != null && rules.max != null ) {
+				rules.range = [ rules.min, rules.max ];
+				delete rules.min;
+				delete rules.max;
+			}
+			if ( rules.minlength != null && rules.maxlength != null ) {
+				rules.rangelength = [ rules.minlength, rules.maxlength ];
+				delete rules.minlength;
+				delete rules.maxlength;
+			}
+		}
+
+		return rules;
+	},
+
+	// Converts a simple string to a {string: true} rule, e.g., "required" to {required:true}
+	normalizeRule: function( data ) {
+		if ( typeof data === "string" ) {
+			var transformed = {};
+			$.each( data.split( /\s/ ), function() {
+				transformed[ this ] = true;
+			});
+			data = transformed;
+		}
+		return data;
+	},
+
+	// http://jqueryvalidation.org/jQuery.validator.addMethod/
+	addMethod: function( name, method, message ) {
+		$.validator.methods[ name ] = method;
+		$.validator.messages[ name ] = message !== undefined ? message : $.validator.messages[ name ];
+		if ( method.length < 3 ) {
+			$.validator.addClassRules( name, $.validator.normalizeRule( name ) );
+		}
+	},
+
+	methods: {
+
+		// http://jqueryvalidation.org/required-method/
+		required: function( value, element, param ) {
+			// check if dependency is met
+			if ( !this.depend( param, element ) ) {
+				return "dependency-mismatch";
+			}
+			if ( element.nodeName.toLowerCase() === "select" ) {
+				// could be an array for select-multiple or a string, both are fine this way
+				var val = $( element ).val();
+				return val && val.length > 0;
+			}
+			if ( this.checkable( element ) ) {
+				return this.getLength( value, element ) > 0;
+			}
+			return value.length > 0;
+		},
+
+		// http://jqueryvalidation.org/email-method/
+		email: function( value, element ) {
+			// From https://html.spec.whatwg.org/multipage/forms.html#valid-e-mail-address
+			// Retrieved 2014-01-14
+			// If you have a problem with this implementation, report a bug against the above spec
+			// Or use custom methods to implement your own email validation
+			return this.optional( element ) || /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test( value );
+		},
+
+		// http://jqueryvalidation.org/url-method/
+		url: function( value, element ) {
+
+			// Copyright (c) 2010-2013 Diego Perini, MIT licensed
+			// https://gist.github.com/dperini/729294
+			// see also https://mathiasbynens.be/demo/url-regex
+			// modified to allow protocol-relative URLs
+			return this.optional( element ) || /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})).?)(?::\d{2,5})?(?:[/?#]\S*)?$/i.test( value );
+		},
+
+		// http://jqueryvalidation.org/date-method/
+		date: function( value, element ) {
+			return this.optional( element ) || !/Invalid|NaN/.test( new Date( value ).toString() );
+		},
+
+		// http://jqueryvalidation.org/dateISO-method/
+		dateISO: function( value, element ) {
+			return this.optional( element ) || /^\d{4}[\/\-](0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])$/.test( value );
+		},
+
+		// http://jqueryvalidation.org/number-method/
+		number: function( value, element ) {
+			return this.optional( element ) || /^(?:-?\d+|-?\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/.test( value );
+		},
+
+		// http://jqueryvalidation.org/digits-method/
+		digits: function( value, element ) {
+			return this.optional( element ) || /^\d+$/.test( value );
+		},
+
+		// http://jqueryvalidation.org/creditcard-method/
+		// based on http://en.wikipedia.org/wiki/Luhn_algorithm
+		creditcard: function( value, element ) {
+			if ( this.optional( element ) ) {
+				return "dependency-mismatch";
+			}
+			// accept only spaces, digits and dashes
+			if ( /[^0-9 \-]+/.test( value ) ) {
+				return false;
+			}
+			var nCheck = 0,
+				nDigit = 0,
+				bEven = false,
+				n, cDigit;
+
+			value = value.replace( /\D/g, "" );
+
+			// Basing min and max length on
+			// http://developer.ean.com/general_info/Valid_Credit_Card_Types
+			if ( value.length < 13 || value.length > 19 ) {
+				return false;
+			}
+
+			for ( n = value.length - 1; n >= 0; n--) {
+				cDigit = value.charAt( n );
+				nDigit = parseInt( cDigit, 10 );
+				if ( bEven ) {
+					if ( ( nDigit *= 2 ) > 9 ) {
+						nDigit -= 9;
+					}
+				}
+				nCheck += nDigit;
+				bEven = !bEven;
+			}
+
+			return ( nCheck % 10 ) === 0;
+		},
+
+		// http://jqueryvalidation.org/minlength-method/
+		minlength: function( value, element, param ) {
+			var length = $.isArray( value ) ? value.length : this.getLength( value, element );
+			return this.optional( element ) || length >= param;
+		},
+
+		// http://jqueryvalidation.org/maxlength-method/
+		maxlength: function( value, element, param ) {
+			var length = $.isArray( value ) ? value.length : this.getLength( value, element );
+			return this.optional( element ) || length <= param;
+		},
+
+		// http://jqueryvalidation.org/rangelength-method/
+		rangelength: function( value, element, param ) {
+			var length = $.isArray( value ) ? value.length : this.getLength( value, element );
+			return this.optional( element ) || ( length >= param[ 0 ] && length <= param[ 1 ] );
+		},
+
+		// http://jqueryvalidation.org/min-method/
+		min: function( value, element, param ) {
+			return this.optional( element ) || value >= param;
+		},
+
+		// http://jqueryvalidation.org/max-method/
+		max: function( value, element, param ) {
+			return this.optional( element ) || value <= param;
+		},
+
+		// http://jqueryvalidation.org/range-method/
+		range: function( value, element, param ) {
+			return this.optional( element ) || ( value >= param[ 0 ] && value <= param[ 1 ] );
+		},
+
+		// http://jqueryvalidation.org/equalTo-method/
+		equalTo: function( value, element, param ) {
+			// bind to the blur event of the target in order to revalidate whenever the target field is updated
+			// TODO find a way to bind the event just once, avoiding the unbind-rebind overhead
+			var target = $( param );
+			if ( this.settings.onfocusout ) {
+				target.off( ".validate-equalTo" ).on( "blur.validate-equalTo", function() {
+					$( element ).valid();
+				});
+			}
+			return value === target.val();
+		},
+
+		// http://jqueryvalidation.org/remote-method/
+		remote: function( value, element, param ) {
+			if ( this.optional( element ) ) {
+				return "dependency-mismatch";
+			}
+
+			var previous = this.previousValue( element ),
+				validator, data;
+
+			if (!this.settings.messages[ element.name ] ) {
+				this.settings.messages[ element.name ] = {};
+			}
+			previous.originalMessage = this.settings.messages[ element.name ].remote;
+			this.settings.messages[ element.name ].remote = previous.message;
+
+			param = typeof param === "string" && { url: param } || param;
+
+			if ( previous.old === value ) {
+				return previous.valid;
+			}
+
+			previous.old = value;
+			validator = this;
+			this.startRequest( element );
+			data = {};
+			data[ element.name ] = value;
+			$.ajax( $.extend( true, {
+				mode: "abort",
+				port: "validate" + element.name,
+				dataType: "json",
+				data: data,
+				context: validator.currentForm,
+				success: function( response ) {
+					var valid = response === true || response === "true",
+						errors, message, submitted;
+
+					validator.settings.messages[ element.name ].remote = previous.originalMessage;
+					if ( valid ) {
+						submitted = validator.formSubmitted;
+						validator.prepareElement( element );
+						validator.formSubmitted = submitted;
+						validator.successList.push( element );
+						delete validator.invalid[ element.name ];
+						validator.showErrors();
+					} else {
+						errors = {};
+						message = response || validator.defaultMessage( element, "remote" );
+						errors[ element.name ] = previous.message = $.isFunction( message ) ? message( value ) : message;
+						validator.invalid[ element.name ] = true;
+						validator.showErrors( errors );
+					}
+					previous.valid = valid;
+					validator.stopRequest( element, valid );
+				}
+			}, param ) );
+			return "pending";
+		}
+	}
+
+});
+
+// ajax mode: abort
+// usage: $.ajax({ mode: "abort"[, port: "uniqueport"]});
+// if mode:"abort" is used, the previous request on that port (port can be undefined) is aborted via XMLHttpRequest.abort()
+
+var pendingRequests = {},
+	ajax;
+// Use a prefilter if available (1.5+)
+if ( $.ajaxPrefilter ) {
+	$.ajaxPrefilter(function( settings, _, xhr ) {
+		var port = settings.port;
+		if ( settings.mode === "abort" ) {
+			if ( pendingRequests[port] ) {
+				pendingRequests[port].abort();
+			}
+			pendingRequests[port] = xhr;
+		}
+	});
+} else {
+	// Proxy ajax
+	ajax = $.ajax;
+	$.ajax = function( settings ) {
+		var mode = ( "mode" in settings ? settings : $.ajaxSettings ).mode,
+			port = ( "port" in settings ? settings : $.ajaxSettings ).port;
+		if ( mode === "abort" ) {
+			if ( pendingRequests[port] ) {
+				pendingRequests[port].abort();
+			}
+			pendingRequests[port] = ajax.apply(this, arguments);
+			return pendingRequests[port];
+		}
+		return ajax.apply(this, arguments);
+	};
+}
+
+}));;
+/*
+ * Translated default messages for the jQuery validation plugin.
+ * Locale: RU (Russian; русский язык)
+ */
+$.extend( $.validator.messages, {
+	required: "Это поле необходимо заполнить.",
+	remote: "Пожалуйста, введите правильное значение.",
+	email: "Пожалуйста, введите корректный адрес электронной почты.",
+	url: "Пожалуйста, введите корректный URL.",
+	date: "Пожалуйста, введите корректную дату.",
+	dateISO: "Пожалуйста, введите корректную дату в формате ISO.",
+	number: "Пожалуйста, введите число.",
+	digits: "Пожалуйста, вводите только цифры.",
+	creditcard: "Пожалуйста, введите правильный номер кредитной карты.",
+	equalTo: "Пожалуйста, введите такое же значение ещё раз.",
+	extension: "Пожалуйста, выберите файл с правильным расширением.",
+	maxlength: $.validator.format( "Пожалуйста, введите не больше {0} символов." ),
+	minlength: $.validator.format( "Пожалуйста, введите не меньше {0} символов." ),
+	rangelength: $.validator.format( "Пожалуйста, введите значение длиной от {0} до {1} символов." ),
+	range: $.validator.format( "Пожалуйста, введите число от {0} до {1}." ),
+	max: $.validator.format( "Пожалуйста, введите число, меньшее или равное {0}." ),
+	min: $.validator.format( "Пожалуйста, введите число, большее или равное {0}." )
+} );
+;
 /**
  * @license
  * lodash 3.9.3 (Custom Build) <https://lodash.com/>

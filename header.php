@@ -13,9 +13,18 @@
     <a href="/" class="item<?= $_SERVER['REQUEST_URI'] == '/' ? ' active' : ''; ?>">
         Главная
     </a>
-    <a href="/YouTubePlayer" class="item<?= $_SERVER['REQUEST_URI'] == '/YouTubePlayer' ? ' active' : ''; ?>">
-        YouTubePlayer
-    </a>
+
+    <div class="ui simple dropdown item">
+        YouTube
+        <i class="dropdown icon"></i>
+
+        <div class="menu">
+            <a href="/YouTubePlayer"
+               class="item<?= $_SERVER['REQUEST_URI'] == '/YouTubePlayer' ? ' active' : ''; ?>">YouTubePlayer</a>
+            <a href="/YouTubePlayerList"
+               class="item<?= $_SERVER['REQUEST_URI'] == '/YouTubePlayerList' ? ' active' : ''; ?>">YouTubePlayerList</a>
+        </div>
+    </div>
     <a href="/VimeoPlayer" class="item<?= $_SERVER['REQUEST_URI'] == '/VimeoPlayer' ? ' active' : ''; ?>">
         VimeoPlayer
     </a>
@@ -34,5 +43,8 @@
     </div>
     <a href="/SimpleSlider" class="item<?= $_SERVER['REQUEST_URI'] == '/SimpleSlider' ? ' active' : ''; ?>">
         SimpleSlider
+    </a>
+    <a href="/SimpleForm" class="item<?= $_SERVER['REQUEST_URI'] == '/SimpleForm' ? ' active' : ''; ?>">
+        SimpleForm
     </a>
 </div>

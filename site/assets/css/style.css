@@ -30503,6 +30503,9 @@ button.list-group-item:active {
 
 
 
+.ui.fixed.menu + .ui.grid {
+  padding-top: 3.95rem;
+}
 
 
 /*

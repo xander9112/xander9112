@@ -21,6 +21,7 @@ $$.YouTube = class YouTube extends $$.Component {
 				enablejsapi:    1,
 				end:            '',
 				loop:           0,
+				showinfo:       0,
 				modestbranding: 1,
 				rel:            0
 			},
@@ -117,8 +118,11 @@ $$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
 		"use strict";
 
 		super(root, options);
+	}
 
-		console.log(this);
+	destroy () {
+		"use strict";
+		this.player.destroy();
 	}
 
 	set mute (isMute) {
@@ -202,5 +206,37 @@ $$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
 	stopVideo () {
 		"use strict";
 		this.player.stopVideo();
+	}
+};
+
+$$.YouTubePlayerList = class YouTubePlayer extends $$.YouTubePlayer {
+	constructor (root, options) {
+		"use strict";
+
+		super(root, options);
+	}
+
+	get playlist () {
+		"use strict";
+
+		return this.player.getPlaylist();
+	}
+
+	cueVideoById (list) {
+		"use strict";
+
+		this.player.cuePlaylist({
+			'playlist':         list,
+			'listType':         'playlist',
+			'index':            0,
+			'startSeconds':     0,
+			'suggestedQuality': 'small'
+		});
+	}
+
+	playVideoAt (index) {
+		"use strict";
+
+		this.player.playVideoAt(index);
 	}
 };

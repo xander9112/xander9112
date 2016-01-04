@@ -4,8 +4,10 @@ class Application {
 	constructor () {
 		this._initMap();
 		this._initYouTubePlayer();
+		this._initYouTubePlayerList();
 		this._initVimeoPlayer();
 		this._initSimpleSlider();
+		this._initSimpleForm();
 	}
 
 	_initMap () {
@@ -124,6 +126,143 @@ class Application {
 					}
 
 
+				});
+
+				form.on('click', '.js-play', function (event) {
+					event.preventDefault();
+					player.playVideo();
+
+					$(this).addClass('active').siblings().removeClass('active');
+				});
+
+				form.on('click', '.js-pause', function (event) {
+					event.preventDefault();
+					player.pauseVideo();
+
+					$(this).addClass('active').siblings().removeClass('active');
+				});
+
+				form.on('click', '.js-stop', function (event) {
+					event.preventDefault();
+					player.stopVideo();
+
+					$(this).addClass('active').siblings().removeClass('active');
+				});
+
+				form.on('click', '.js-mute', function (event) {
+					event.preventDefault();
+					player.mute = !player.isMuted();
+
+					if (player.isMuted()) {
+						$(this).find('.icon').removeClass('volume off');
+						$(this).find('.icon').addClass('volume up');
+						$('.js-volume').removeClass('disabled');
+					} else {
+						$(this).find('.icon').removeClass('volume up');
+						$(this).find('.icon').addClass('volume off');
+						$('.js-volume').addClass('disabled');
+					}
+				});
+
+				$('.js-volume').progress({
+					percent: player.volume
+				});
+
+				form.on('click', '.js-volume-minus', function (event) {
+					event.preventDefault();
+					if (player.volume === 0) {
+						$('.js-volume').progress({
+							percent: 0
+						});
+						return;
+					}
+
+					player.volume -= 10;
+
+					$('.js-volume').progress({
+						percent: player.volume
+					});
+				});
+
+				form.on('click', '.js-volume-plus', function (event) {
+					event.preventDefault();
+					if (player.volume === 100) {
+						$('.js-volume').progress({
+							percent: 100
+						});
+
+						return;
+					}
+
+					player.volume += 10;
+
+					$('.js-volume').progress({
+						percent: player.volume
+					});
+				});
+			});
+		});
+	}
+
+	_initYouTubePlayerList () {
+		"use strict";
+
+		$('.js-youtube-player-list').each(function () {
+			let dimmer = $('.js-dimmer');
+
+			let player = new $$.YouTubePlayerList($('.js-youtube-player-list'), {
+				width:      '640',
+				height:     '480',
+				videoId:    $(this).data('id'),
+				playerVars: {
+					disablekb: 0
+				}
+			});
+
+			let form = $('.js-form-video');
+
+			//$('.js-video-list')
+
+			player.on('PlayerCreated', function () {
+				dimmer.removeClass('active');
+
+				$('.js-progress-time').progress({
+					percent: 0
+				});
+
+				var interval = null;
+
+				let allTime = $$.secondsToTime(player.duration);
+
+				$('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
+
+				player.on('PlayerStateChange', function () {
+					if (player.playerState === 1) {
+						interval = setInterval(() => {
+							let currentTime = parseInt(player.CurrentTime);
+							let duration = parseInt(player.duration);
+
+							let allTime = $$.secondsToTime(player.CurrentTime);
+							$('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
+
+							$('.js-progress-time').progress({
+								percent: parseInt(((currentTime / duration) * 100))
+							});
+						}, 1000);
+					} else {
+						clearInterval(interval);
+					}
+				});
+
+
+				$('.js-video-list').find('.item').each(function (index) {
+					let indexElement = index;
+
+					$(this).on('click', 'a', (event) => {
+						event.preventDefault();
+						let item = $(event.currentTarget);
+						player.cueVideoById(item.data('id'));
+					});
 				});
 
 				form.on('click', '.js-play', function (event) {
@@ -371,6 +510,120 @@ class Application {
 
 				item.append(`<div class="index"><span>${index}</span></div>`);
 			});
+		});
+	}
+
+	_initSimpleForm () {
+		"use strict";
+
+		$('select.dropdown').dropdown();
+		$('.ui.checkbox').checkbox();
+
+		$('.js-form-generator').each(function () {
+			let generatorForm = $(this);
+			let simple = $('.js-simple-form');
+			let firstLevel = generatorForm.find('.first-level');
+			let secondLevel = generatorForm.find('.second-level');
+
+			secondLevel.slideUp();
+
+			generatorForm.on('click', '.js-create-form', (event) => {
+				let simpleForm = new $$.SimpleForm(simple, {
+					method:          generatorForm.find('.js-method .selected').text(),
+					action:          generatorForm.find('.js-action').val(),
+					additionalClass: 'ui form'
+				});
+
+				simpleForm.createForm();
+
+				firstLevel.slideUp();
+				secondLevel.slideDown();
+
+				generatorForm.on('click', '.js-create-field', (event) => {
+					let options = {};
+
+					secondLevel.find('input, select').each(function () {
+						let item = $(this);
+
+						if (item[ 0 ].nodeName === 'INPUT' || item[ 0 ].nodeName === 'SELECT') {
+							if (item.val() !== '') {
+
+								if (item.attr('type') === 'checkbox') {
+									item.val(item.val() === 'on' ? true : false);
+								}
+
+								options[ item.attr('name') ] = item.val();
+							}
+						}
+					});
+
+					console.log(options);
+
+					let field = simpleForm.createInput({
+						label:           'Тестовое поле',
+						name:            'INPUT_TEST',
+						type:            'text',
+						placeholder:     'Плейсхолдер',
+						required:        {
+							required: true,
+							message:  'Это поля обязательно к заполнению!!!'
+						},
+						additionalClass: 'field'
+					});
+
+				});
+
+				/*
+
+				 simpleForm.createSubmit({
+				 name:            'SUBMIT',
+				 type:            'submit',
+				 value:           'Отправить форму',
+				 additionalClass: 'ui button'
+				 });*/
+
+
+			});
+
+
+			/*form.validate({
+			 errorPlacement: function (error, element) {
+			 let field = element.parent();
+			 field.parents('form').removeClass('loading');
+
+			 field.addClass('error');
+			 field.find('.f-error').text(error.text());
+
+
+			 },
+			 submitHandler:  (form) => {
+			 form = $(form);
+			 form.addClass('loading');
+
+			 form.find('.f-field').each(function () {
+			 $(this).removeClass('error');
+			 $(this).find('.f-error').text('');
+			 });
+
+
+			 /!**
+			 * TODO: Временный код
+			 *!/
+
+			 setTimeout(function () {
+			 form.removeClass('loading');
+			 }, 1000);
+			 },
+			 success:        function (label, element) {
+			 // set &nbsp; as text for IE
+
+			 let field = $(element).parent();
+			 field.parents('form').removeClass('loading');
+			 field.removeClass('error');
+			 field.addClass('success');
+			 field.find('.f-error').text('');
+			 }
+			 });*/
 		});
 	}
 }

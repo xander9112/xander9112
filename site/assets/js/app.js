@@ -1065,6 +1065,183 @@ $$.MercatorProjection = (function () {
 
 	return MercatorProjection;
 })();
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var $$ = $$ || {};
+
+$$.SimpleForm = (function (_$$$Component) {
+	_inherits(SimpleForm, _$$$Component);
+
+	function SimpleForm(root, options) {
+		_classCallCheck(this, SimpleForm);
+
+		_get(Object.getPrototypeOf(SimpleForm.prototype), 'constructor', this).call(this, root, options);
+
+		this.types = ['button', 'checkbox', 'hidden', 'password', 'radio', 'reset', 'submit', 'text', 'email', 'range', 'search', 'tel', 'url'];
+	}
+
+	_createClass(SimpleForm, [{
+		key: 'initialize',
+		value: function initialize() {
+			"use strict";
+
+			_get(Object.getPrototypeOf(SimpleForm.prototype), 'initialize', this).call(this);
+		}
+	}, {
+		key: '_cacheNodes',
+		value: function _cacheNodes() {
+			"use strict";
+
+			this.nodes = {};
+		}
+	}, {
+		key: '_bindEvents',
+		value: function _bindEvents() {
+			"use strict";
+		}
+	}, {
+		key: '_ready',
+		value: function _ready() {
+			"use strict";
+		}
+	}, {
+		key: '_template',
+		value: function _template() {
+			"use strict";
+
+			var formId = _.uniqueId('simple-form_');
+			var action = this.options.action;
+			var method = this.options.method;
+			var additionalClass = this.options.additionalClass;
+
+			return '<form name="' + formId + '" action="' + action + '" method="' + method + '" class="' + additionalClass + '"></form>';
+		}
+	}, {
+		key: 'createForm',
+		value: function createForm() {
+			"use strict";
+
+			this.form = $(this._template()).appendTo(this.root);
+		}
+	}, {
+		key: 'createInput',
+		value: function createInput() {
+			"use strict";
+
+			var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+			if (!this.form.length) {
+				console.error('Форма не создана');
+				return;
+			}
+
+			if (!options.type) {
+				console.error('Не указан тип поля');
+				return;
+			}
+
+			if (_.indexOf(this.types, options.type) < 0) {
+				console.error('Неверно указан тип поля');
+				return;
+			}
+
+			if (!options.name) {
+				console.error('Не указано имя поля');
+				return;
+			}
+
+			//options
+			/**
+    * label
+    * name
+    * type
+    * value
+    * placeholder
+    * required: {
+    *  required: true,
+    *  message: 'Сообщение об ошибке'
+    *  }
+    * additionalClass
+    */
+
+			var type = options.type;
+			var name = options.name;
+			var value = options.value || '';
+			var placeholder = options.placeholder || '';
+			var dataRequired = '';
+			var errorTemplate = '';
+
+			if (options.required) {
+				var required = options.required.required;
+				var message = options.required.message;
+				var errorAdditionalClass = options.required.additionalClass || '';
+				dataRequired = '\n\t\t\t\tdata-rule-required="' + required + '"\n\t\t\t\tdata-msg-required="' + message + '"\n\t\t\t';
+
+				errorTemplate = '<span class="f-error ' + errorAdditionalClass + '"></span>';
+			}
+
+			var inputId = _.uniqueId(type + '-' + name + '_');
+			var additionalClass = options.additionalClass || '';
+			var labelTemplate = '';
+			var inputTemplate = '\n\t\t<input\n\t\t\ttype="' + type + '"\n\t\t\tname="' + name + '"\n\t\t\tid="' + inputId + '"\n\t\t\tplaceholder="' + placeholder + '"\n\t\t\t' + dataRequired + '\n\t\t\tvalue="' + value + '">\n\t\t';
+
+			if (options.label) {
+				labelTemplate = '<label for="' + inputId + '" class="f-label">' + options.label + '</label>';
+			}
+
+			var field = '\n\t\t\t<div class="f-field ' + additionalClass + '">\n\t\t\t\t' + labelTemplate + '\n\t\t\t\t' + inputTemplate + '\n\t\t\t\t' + errorTemplate + '\n\t\t\t</div>\n\t\t';
+
+			return $(field).appendTo(this.form);
+		}
+	}, {
+		key: 'createSubmit',
+		value: function createSubmit() {
+			"use strict";
+
+			var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+			if (!this.form.length) {
+				console.error('Форма не создана');
+				return;
+			}
+
+			//options
+			/**
+    * name
+    * value
+    * additionalClass
+    */
+
+			var type = 'submit';
+			var name = options.name;
+			var value = options.value || '';
+
+			var inputId = _.uniqueId(type + '-' + name + '_');
+			var additionalClass = options.additionalClass || '';
+			var labelTemplate = '';
+			var inputTemplate = '\n\t\t<button\n\t\t\ttype="' + type + '"\n\t\t\tname="' + name + '"\n\t\t\tclass="f-field ' + additionalClass + '"\n\t\t\tid="' + inputId + '">\n\t\t\t\t' + value + '\n\t\t\t</button>\n\t\t';
+
+			var field = '' + inputTemplate;
+
+			return $(field).appendTo(this.form);
+		}
+	}, {
+		key: '_defaultOptions',
+		get: function get() {
+			"use strict";
+
+			return {};
+		}
+	}]);
+
+	return SimpleForm;
+})($$.Component);
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -1272,57 +1449,6 @@ $$.SimpleSlider = (function (_$$$Component) {
 	}]);
 
 	return SimpleSlider;
-})($$.Component);
-"use strict";
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var $$ = $$ || {};
-
-$$.TestClass = (function (_$$$Component) {
-	_inherits(TestClass, _$$$Component);
-
-	function TestClass(root, options) {
-		_classCallCheck(this, TestClass);
-
-		_get(Object.getPrototypeOf(TestClass.prototype), "constructor", this).call(this, root, options);
-	}
-
-	_createClass(TestClass, [{
-		key: "initialize",
-		value: function initialize() {
-			"use strict";
-			_get(Object.getPrototypeOf(TestClass.prototype), "initialize", this).call(this);
-		}
-	}, {
-		key: "_cacheNodes",
-		value: function _cacheNodes() {
-			this.nodes = {};
-		}
-	}, {
-		key: "_bindEvents",
-		value: function _bindEvents() {}
-	}, {
-		key: "_ready",
-		value: function _ready() {
-			"use strict";
-		}
-	}, {
-		key: "_defaultOptions",
-		get: function get() {
-			"use strict";
-
-			return {};
-		}
-	}]);
-
-	return TestClass;
 })($$.Component);
 'use strict';
 
@@ -1698,6 +1824,7 @@ $$.YouTube = (function (_$$$Component) {
 					enablejsapi: 1,
 					end: '',
 					loop: 0,
+					showinfo: 0,
 					modestbranding: 1,
 					rel: 0
 				},
@@ -1718,11 +1845,15 @@ $$.YouTubePlayer = (function (_$$$YouTube) {
 		_classCallCheck(this, YouTubePlayer);
 
 		_get(Object.getPrototypeOf(YouTubePlayer.prototype), 'constructor', this).call(this, root, options);
-
-		console.log(this);
 	}
 
 	_createClass(YouTubePlayer, [{
+		key: 'destroy',
+		value: function destroy() {
+			"use strict";
+			this.player.destroy();
+		}
+	}, {
 		key: 'isMuted',
 		value: function isMuted() {
 			"use strict";
@@ -1819,6 +1950,49 @@ $$.YouTubePlayer = (function (_$$$YouTube) {
 
 	return YouTubePlayer;
 })($$.YouTube);
+
+$$.YouTubePlayerList = (function (_$$$YouTubePlayer) {
+	_inherits(YouTubePlayer, _$$$YouTubePlayer);
+
+	function YouTubePlayer(root, options) {
+		"use strict";
+
+		_classCallCheck(this, YouTubePlayer);
+
+		_get(Object.getPrototypeOf(YouTubePlayer.prototype), 'constructor', this).call(this, root, options);
+	}
+
+	_createClass(YouTubePlayer, [{
+		key: 'cueVideoById',
+		value: function cueVideoById(list) {
+			"use strict";
+
+			this.player.cuePlaylist({
+				'playlist': list,
+				'listType': 'playlist',
+				'index': 0,
+				'startSeconds': 0,
+				'suggestedQuality': 'small'
+			});
+		}
+	}, {
+		key: 'playVideoAt',
+		value: function playVideoAt(index) {
+			"use strict";
+
+			this.player.playVideoAt(index);
+		}
+	}, {
+		key: 'playlist',
+		get: function get() {
+			"use strict";
+
+			return this.player.getPlaylist();
+		}
+	}]);
+
+	return YouTubePlayer;
+})($$.YouTubePlayer);
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -1833,8 +2007,10 @@ var Application = (function () {
 
 		this._initMap();
 		this._initYouTubePlayer();
+		this._initYouTubePlayerList();
 		this._initVimeoPlayer();
 		this._initSimpleSlider();
+		this._initSimpleForm();
 	}
 
 	_createClass(Application, [{
@@ -1954,6 +2130,143 @@ var Application = (function () {
 						} else {
 							clearInterval(interval);
 						}
+					});
+
+					form.on('click', '.js-play', function (event) {
+						event.preventDefault();
+						player.playVideo();
+
+						$(this).addClass('active').siblings().removeClass('active');
+					});
+
+					form.on('click', '.js-pause', function (event) {
+						event.preventDefault();
+						player.pauseVideo();
+
+						$(this).addClass('active').siblings().removeClass('active');
+					});
+
+					form.on('click', '.js-stop', function (event) {
+						event.preventDefault();
+						player.stopVideo();
+
+						$(this).addClass('active').siblings().removeClass('active');
+					});
+
+					form.on('click', '.js-mute', function (event) {
+						event.preventDefault();
+						player.mute = !player.isMuted();
+
+						if (player.isMuted()) {
+							$(this).find('.icon').removeClass('volume off');
+							$(this).find('.icon').addClass('volume up');
+							$('.js-volume').removeClass('disabled');
+						} else {
+							$(this).find('.icon').removeClass('volume up');
+							$(this).find('.icon').addClass('volume off');
+							$('.js-volume').addClass('disabled');
+						}
+					});
+
+					$('.js-volume').progress({
+						percent: player.volume
+					});
+
+					form.on('click', '.js-volume-minus', function (event) {
+						event.preventDefault();
+						if (player.volume === 0) {
+							$('.js-volume').progress({
+								percent: 0
+							});
+							return;
+						}
+
+						player.volume -= 10;
+
+						$('.js-volume').progress({
+							percent: player.volume
+						});
+					});
+
+					form.on('click', '.js-volume-plus', function (event) {
+						event.preventDefault();
+						if (player.volume === 100) {
+							$('.js-volume').progress({
+								percent: 100
+							});
+
+							return;
+						}
+
+						player.volume += 10;
+
+						$('.js-volume').progress({
+							percent: player.volume
+						});
+					});
+				});
+			});
+		}
+	}, {
+		key: '_initYouTubePlayerList',
+		value: function _initYouTubePlayerList() {
+			"use strict";
+
+			$('.js-youtube-player-list').each(function () {
+				var dimmer = $('.js-dimmer');
+
+				var player = new $$.YouTubePlayerList($('.js-youtube-player-list'), {
+					width: '640',
+					height: '480',
+					videoId: $(this).data('id'),
+					playerVars: {
+						disablekb: 0
+					}
+				});
+
+				var form = $('.js-form-video');
+
+				//$('.js-video-list')
+
+				player.on('PlayerCreated', function () {
+					dimmer.removeClass('active');
+
+					$('.js-progress-time').progress({
+						percent: 0
+					});
+
+					var interval = null;
+
+					var allTime = $$.secondsToTime(player.duration);
+
+					$('.js-all-time').text(allTime.minutes + ':' + allTime.sec);
+
+					player.on('PlayerStateChange', function () {
+						if (player.playerState === 1) {
+							interval = setInterval(function () {
+								var currentTime = parseInt(player.CurrentTime);
+								var duration = parseInt(player.duration);
+
+								var allTime = $$.secondsToTime(player.CurrentTime);
+								$('.js-current-time').text(allTime.minutes + ':' + allTime.sec);
+
+								$('.js-progress-time').progress({
+									percent: parseInt(currentTime / duration * 100)
+								});
+							}, 1000);
+						} else {
+							clearInterval(interval);
+						}
+					});
+
+					$('.js-video-list').find('.item').each(function (index) {
+						var indexElement = index;
+
+						$(this).on('click', 'a', function (event) {
+							event.preventDefault();
+							var item = $(event.currentTarget);
+							player.cueVideoById(item.data('id'));
+						});
 					});
 
 					form.on('click', '.js-play', function (event) {
@@ -2201,6 +2514,110 @@ var Application = (function () {
 
 					item.append('<div class="index"><span>' + index + '</span></div>');
 				});
+			});
+		}
+	}, {
+		key: '_initSimpleForm',
+		value: function _initSimpleForm() {
+			"use strict";
+
+			$('select.dropdown').dropdown();
+			$('.ui.checkbox').checkbox();
+
+			$('.js-form-generator').each(function () {
+				var generatorForm = $(this);
+				var simple = $('.js-simple-form');
+				var firstLevel = generatorForm.find('.first-level');
+				var secondLevel = generatorForm.find('.second-level');
+
+				secondLevel.slideUp();
+
+				generatorForm.on('click', '.js-create-form', function (event) {
+					var simpleForm = new $$.SimpleForm(simple, {
+						method: generatorForm.find('.js-method .selected').text(),
+						action: generatorForm.find('.js-action').val(),
+						additionalClass: 'ui form'
+					});
+
+					simpleForm.createForm();
+
+					firstLevel.slideUp();
+					secondLevel.slideDown();
+
+					generatorForm.on('click', '.js-create-field', function (event) {
+						var options = {};
+
+						secondLevel.find('input, select').each(function () {
+							var item = $(this);
+
+							if (item[0].nodeName === 'INPUT' || item[0].nodeName === 'SELECT') {
+								if (item.val() !== '') {
+
+									if (item.attr('type') === 'checkbox') {
+										item.val(item.val() === 'on' ? true : false);
+									}
+
+									options[item.attr('name')] = item.val();
+								}
+							}
+						});
+
+						console.log(options);
+
+						var field = simpleForm.createInput({
+							label: 'Тестовое поле',
+							name: 'INPUT_TEST',
+							type: 'text',
+							placeholder: 'Плейсхолдер',
+							required: {
+								required: true,
+								message: 'Это поля обязательно к заполнению!!!'
+							},
+							additionalClass: 'field'
+						});
+					});
+
+					/*
+     		 simpleForm.createSubmit({
+      name:            'SUBMIT',
+      type:            'submit',
+      value:           'Отправить форму',
+      additionalClass: 'ui button'
+      });*/
+				});
+
+				/*form.validate({
+     errorPlacement: function (error, element) {
+     let field = element.parent();
+     field.parents('form').removeClass('loading');
+    		 field.addClass('error');
+     field.find('.f-error').text(error.text());
+    
+     },
+     submitHandler:  (form) => {
+     form = $(form);
+     form.addClass('loading');
+    		 form.find('.f-field').each(function () {
+     $(this).removeClass('error');
+     $(this).find('.f-error').text('');
+     });
+    
+     /!**
+     * TODO: Временный код
+     *!/
+    		 setTimeout(function () {
+     form.removeClass('loading');
+     }, 1000);
+     },
+     success:        function (label, element) {
+     // set &nbsp; as text for IE
+    		 let field = $(element).parent();
+     field.parents('form').removeClass('loading');
+     field.removeClass('error');
+     field.addClass('success');
+     field.find('.f-error').text('');
+     }
+     });*/
 			});
 		}
 	}]);
