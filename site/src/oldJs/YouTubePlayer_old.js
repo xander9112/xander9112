@@ -1,17 +1,11 @@
+/*
 var $$ = $$ || {};
 
-$$.YouTube = class YouTube extends $$.Component {
+$$.YouTube = class YouTube {
 	constructor (root, options) {
-		super(root, options);
+		this.root = root;
 
-		this.player = undefined;
-		this.YT = undefined;
-	}
-
-	get _defaultOptions () {
-		"use strict";
-
-		return {
+		this.options = {
 			width:      '640',
 			height:     '360',
 			playerVars: {
@@ -25,21 +19,22 @@ $$.YouTube = class YouTube extends $$.Component {
 				rel:            0
 			},
 			videoId:    'M7lc1UVf-VE'
-		}
-	}
+		};
 
-	initialize () {
-		"use strict";
+		_.merge(this.options, options);
+
+		this.YT = undefined;
+
+		this._cacheNodes();
+		this._bindEvents();
 		this._createScript();
-
-		super.initialize();
+		this._ready();
 	}
 
-
-	/**
+	/!**
 	 * Загружаем скрипт в браузер
 	 * @private
-	 */
+	 *!/
 
 	_createScript () {
 		"use strict";
@@ -58,7 +53,7 @@ $$.YouTube = class YouTube extends $$.Component {
 				if (YT.loaded) {
 					clearInterval(interval);
 					this.YT = YT;
-					this.trigger('YouTubeIframeAPIReady');
+					this.root.trigger('YouTubeIframeAPIReady');
 				}
 			}
 		}, 1);
@@ -71,14 +66,14 @@ $$.YouTube = class YouTube extends $$.Component {
 	_bindEvents () {
 		"use strict";
 
-		this.on('YouTubeIframeAPIReady', () => {
+		this.root.on('YouTubeIframeAPIReady', () => {
 			this._createPlayer();
 		});
 
-		this.on('PlayerCreated', () => {
+		this.root.on('PlayerCreated', () => {
 		});
 
-		this.on('PlayerStateChange', (event, data) => {
+		this.root.on('PlayerStateChange', (event, data) => {
 		});
 	}
 
@@ -88,10 +83,10 @@ $$.YouTube = class YouTube extends $$.Component {
 		var playerOptions = {
 			events: {
 				'onReady':       (event) => {
-					this.trigger('PlayerCreated');
+					this.root.trigger('PlayerCreated');
 				},
 				'onStateChange': (event) => {
-					this.trigger('PlayerStateChange', event);
+					this.root.trigger('PlayerStateChange', event);
 				}
 			}
 		};
@@ -116,9 +111,7 @@ $$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
 	constructor (root, options) {
 		"use strict";
 
-		super(root, options);
-
-		console.log(this);
+		super(root, options)
 	}
 
 	set mute (isMute) {
@@ -160,7 +153,7 @@ $$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
 		this.player.setSize(size.width, size.height);
 	}
 
-	/**
+	/!**
 	 * Возвращает состояние проигрывателя. Возможные значения:
 	 * @returns
 	 * -1 – воспроизведение видео не началось
@@ -169,7 +162,7 @@ $$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
 	 * 2 – пауза
 	 * 3 – буферизация
 	 * 5 – видео находится в очереди
-	 */
+	 *!/
 
 	get playerState () {
 		"use strict";
@@ -204,3 +197,4 @@ $$.YouTubePlayer = class YouTubePlayer extends $$.YouTube {
 		this.player.stopVideo();
 	}
 };
+*/

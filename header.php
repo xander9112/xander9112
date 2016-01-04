@@ -20,13 +20,19 @@
         VimeoPlayer
     </a>
 
+
     <div class="ui simple dropdown item">
         GoogleMaps
         <i class="dropdown icon"></i>
 
         <div class="menu">
-            <a href="/GoogleMapsOffsetLeft" class="item<?= $_SERVER['REQUEST_URI'] == '/GoogleMapsOffsetLeft' ? ' active' : ''; ?>">GoogleMapsOffsetLeft</a>
-            <a href="/GoogleMapsOffsetTop" class="item<?= $_SERVER['REQUEST_URI'] == '/GoogleMapsOffsetTop' ? ' active' : ''; ?>">GoogleMapsOffsetTop</a>
+            <a href="/GoogleMapsOffsetLeft"
+               class="item<?= $_SERVER['REQUEST_URI'] == '/GoogleMapsOffsetLeft' ? ' active' : ''; ?>">GoogleMapsOffsetLeft</a>
+            <a href="/GoogleMapsOffsetTop"
+               class="item<?= $_SERVER['REQUEST_URI'] == '/GoogleMapsOffsetTop' ? ' active' : ''; ?>">GoogleMapsOffsetTop</a>
         </div>
     </div>
+    <a href="/SimpleSlider" class="item<?= $_SERVER['REQUEST_URI'] == '/SimpleSlider' ? ' active' : ''; ?>">
+        SimpleSlider
+    </a>
 </div>

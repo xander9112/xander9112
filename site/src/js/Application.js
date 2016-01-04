@@ -5,6 +5,7 @@ class Application {
 		this._initMap();
 		this._initYouTubePlayer();
 		this._initVimeoPlayer();
+		this._initSimpleSlider();
 	}
 
 	_initMap () {
@@ -91,7 +92,7 @@ class Application {
 
 			let form = $('.js-form-video');
 
-			player.root.on('PlayerCreated', function () {
+			player.on('PlayerCreated', function () {
 				dimmer.removeClass('active');
 
 				$('.js-progress-time').progress({
@@ -104,7 +105,7 @@ class Application {
 
 				$('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
 
-				player.root.on('PlayerStateChange', function () {
+				player.on('PlayerStateChange', function () {
 
 					if (player.playerState === 1) {
 						interval = setInterval(() => {
@@ -215,7 +216,7 @@ class Application {
 
 			let form = $('.js-form-video');
 
-			player.root.on('PlayerCreated', function () {
+			player.on('PlayerCreated', function () {
 				dimmer.removeClass('active');
 
 				$('.js-progress-time').progress({
@@ -238,7 +239,7 @@ class Application {
 				});
 
 
-				player.root.on('PlayerStateChange', function () {
+				player.on('PlayerStateChange', function () {
 					let currentTime = 0;
 					let allTime = 0;
 					let duration = 0;
@@ -353,6 +354,22 @@ class Application {
 						});
 					});
 				});
+			});
+		});
+	}
+
+	_initSimpleSlider () {
+		"use strict";
+
+		$('.js-simple-slider').each(function () {
+			let slider = new $$.SimpleSlider($(this), {
+				isCyclical: false
+			});
+
+			slider.nodes.items.each(function (index) {
+				let item = $(this);
+
+				item.append(`<div class="index"><span>${index}</span></div>`);
 			});
 		});
 	}

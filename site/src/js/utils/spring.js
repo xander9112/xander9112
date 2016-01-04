@@ -3,22 +3,22 @@ $$.Simulation = $$.Simulation || {};
 /**
  * @constructor
  */
-$$.Simulation.Spring = function(options) {
+$$.Simulation.Spring = function (options) {
 	options = _.extend({
-		frozen: false,
-		position: 0,
-		positionLimits: null,
-		target: 0,
-		targetLimits: null,
-		velocity: 0,
-		velocityLimit: null,
-		rigidness: 1,
-		damping: 1,
-		forcePower: 1,
-		targetVelocityLimit: null,
+		frozen:                   false,
+		position:                 0,
+		positionLimits:           null,
+		target:                   0,
+		targetLimits:             null,
+		velocity:                 0,
+		velocityLimit:            null,
+		rigidness:                1,
+		damping:                  1,
+		forcePower:               1,
+		targetVelocityLimit:      null,
 		targetVelocityLimitPower: 1.25,
-		stopAtTarget: false,
-		step: null
+		stopAtTarget:             false,
+		step:                     null
 	}, options || {});
 
 	this._frozen = options.frozen;
@@ -46,33 +46,33 @@ $$.Simulation.Spring = function(options) {
 };
 
 $$.Simulation.Spring.prototype = {
-	_applyTargetLimits: function() {
+	_applyTargetLimits: function () {
 		if (this._targetLimits === null) {
 			return;
 		}
 
-		if (this._target < this._targetLimits[0]) {
-			this._target = this._targetLimits[0];
-		} else if (this._target > this._targetLimits[1]) {
-			this._target = this._targetLimits[1];
+		if (this._target < this._targetLimits[ 0 ]) {
+			this._target = this._targetLimits[ 0 ];
+		} else if (this._target > this._targetLimits[ 1 ]) {
+			this._target = this._targetLimits[ 1 ];
 		}
 	},
 
-	destroy: function() {
+	destroy: function () {
 		this._step = null;
 		$$.Simulation.__springSimulator.deleteSpring(this);
 	},
 
-	moveTarget: function(delta) {
+	moveTarget: function (delta) {
 		this._target += delta;
 		this._applyTargetLimits();
 	},
 
-	step: function(callback) {
+	step: function (callback) {
 		this._step = _.bind(callback, this);
 	},
 
-	target: function(value) {
+	target: function (value) {
 		if (arguments.length == 0) {
 			return this._target;
 		}
@@ -81,7 +81,7 @@ $$.Simulation.Spring.prototype = {
 		this._applyTargetLimits();
 	},
 
-	targetLimits: function(value) {
+	targetLimits: function (value) {
 		if (arguments.length == 0) {
 			return this._targetLimits;
 		}
@@ -97,12 +97,12 @@ _.each([
 	'frozen', 'position', 'positionLimits', 'velocity', 'velocityLimit'
 	, 'rigidness', 'damping', 'forcePower',
 	, 'targetVelocityLimit', 'targetVelocityLimitPower', 'stopAtTarget'
-], function(k) {
-	$$.Simulation.Spring.prototype[k] = function(value) {
+], function (k) {
+	$$.Simulation.Spring.prototype[ k ] = function (value) {
 		if (arguments.length == 0) {
-			return this['_' + k];
+			return this[ '_' + k ];
 		}
 
-		this['_' + k] = value;
+		this[ '_' + k ] = value;
 	};
 });

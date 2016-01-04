@@ -8,24 +8,14 @@ const GMEventListener = GM.event.addListener;
  * @type {GoogleMap}
  */
 
-$$.GoogleMap = class GoogleMap extends $$.Component {
+$$.GoogleMap = class GoogleMap {
 	/**
 	 *
 	 * @param root
 	 * @param options
 	 */
-	constructor (root, options) {
-		super(root, options);
-
-		this.MercatorProjection = null;
-		this.MapIcon = null;
-		this.MapCenter = null;
-	}
-
-	get _defaultOptions () {
-		"use strict";
-
-		return {
+	constructor (root, options = {}) {
+		var defaultOptions = {
 			offset:      {
 				top:  false,
 				left: false
@@ -80,13 +70,22 @@ $$.GoogleMap = class GoogleMap extends $$.Component {
 					}
 				]
 			}
-		}
+		};
+
+		this.root = root;
+		this.options = _.merge(defaultOptions, options);
+
+		this.MercatorProjection = null;
+		this.MapIcon = null;
+		this.MapCenter = null;
+
+		this.initialize();
 	}
 
 	initialize () {
 		"use strict";
 
-		super.initialize()
+		this._ready();
 	}
 
 	set icon (value) {

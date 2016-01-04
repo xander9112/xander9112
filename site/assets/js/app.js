@@ -1,261 +1,269 @@
-/**
- * Base emitter class.
- *
- * Dependencies: underscore.js.
- *
- * Example:
- *
- *   var e = new $$.Emitter();
- *
- *   e.on('event1', function() {});
- *   e.on('event2.namespace1', function() {});
- *   e.on('event2.namespace2', function() {});
- *   e.on('event3a.namespace3', function() {});
- *   e.on('event3b.namespace3', function() {});
- *   e.on('event3c.namespace3', function() {});
- *   e.emit('event1', { Some event data here... });
- *   e.emit('event2.namespace1');
- *   e.off('event1');
- *   e.off('event2.namespace1');
- *   e.off('event2.namespace2');
- *   e.off('.namespace3');
- *
- * Multiple event data arguments are supported.
- *
- *   e.on('event10', function(a, b, c) { ... });
- *   e.emit('event10', 2, 'qwe', { x: 3, y: 'zxc' });
- *
- * Also #trigger() is an alias for #emit().
- *
- * NOTE: The namespace name "*" has a special meaning in $$.Emitter.ItemContainer.
- */
-
 'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var $$ = $$ || {};
 
-/**
- * @constructor
- */
-$$.Emitter = function () {
-	this._itemContainer = new $$.Emitter.ItemContainer();
-};
+$$.Emitter = (function () {
+	function Emitter() {
+		_classCallCheck(this, Emitter);
 
-$$.Emitter.prototype = {
+		this._itemContainer = new $$.Emitter.ItemContainer();
+	}
+
 	/**
   * @param {String} eventId
   * @return {Boolean}
   * @private
   */
-	_isEventIdJustANamespace: function _isEventIdJustANamespace(eventId) {
-		eventId = String(eventId);
 
-		return !!eventId.match(/^\.[a-z\d]+$/i);
-	},
+	_createClass(Emitter, [{
+		key: '_isEventIdJustANamespace',
+		value: function _isEventIdJustANamespace(eventId) {
+			eventId = String(eventId);
 
-	/**
-  * @param {String} eventId
-  * @return {Array} [eventName, namespace]
-  * @throws {Error}
-  * @private
-  */
-	_parseAndValidateEventId: function _parseAndValidateEventId(eventId) {
-		eventId = String(eventId);
-
-		// Either a single event name.
-
-		var match = eventId.match(/^[a-z\d]+$/i);
-
-		if (match) {
-			return [match[0], null];
+			return !!eventId.match(/^\.[a-z\d]+$/i);
 		}
 
-		// Or an event name + a namespace name.
+		/**
+   * @param {String} eventId
+   * @return {Array} [eventName, namespace]
+   * @throws {Error}
+   * @private
+   */
+	}, {
+		key: '_parseAndValidateEventId',
+		value: function _parseAndValidateEventId(eventId) {
+			eventId = String(eventId);
 
-		match = eventId.match(/^([a-z\d]+)\.([a-z\d]+)$/i);
+			// Either a single event name.
 
-		if (!match) {
-			throw Error('Full event names should not be empty, should consist of letters and numbers' + ' and may contain only single dot in the middle.');
+			var match = eventId.match(/^[a-z\d]+$/i);
+
+			if (match) {
+				return [match[0], null];
+			}
+
+			// Or an event name + a namespace name.
+
+			match = eventId.match(/^([a-z\d]+)\.([a-z\d]+)$/i);
+
+			if (!match) {
+				throw Error('Full event names should not be empty, should consist of letters and numbers' + ' and may contain only single dot in the middle.');
+			}
+
+			return [match[1], match[2]];
 		}
 
-		return [match[1], match[2]];
-	},
+		/**
+   * @param {String} eventId
+   */
+	}, {
+		key: 'trigger',
+		value: function trigger(eventId /*, eventData1, eventData2, ... */) {
+			eventId = String(eventId);
 
-	/**
-  * @param {String} eventId
-  */
-	emit: function emit(eventId /*, eventData1, eventData2, ... */) {
-		eventId = String(eventId);
-
-		var parts = this._parseAndValidateEventId(eventId);
-		var items = this._itemContainer.getItems(parts[0], parts[1]);
-		var args = Array.prototype.slice.call(arguments, 1);
-
-		_.each(items, function (item) {
-			item.callback.apply(null, args);
-		});
-	},
-
-	/**
-  * @param {String} eventId
-  * @param {Function} callback
-  */
-	on: function on(eventId, callback) {
-		if (callback == null) {
-			throw Error('An event callback should be provided.');
-		}
-
-		if (!_.isFunction(callback)) {
-			throw Error('An event callback should be a function.');
-		}
-
-		var parts = this._parseAndValidateEventId(eventId);
-
-		this._itemContainer.add(parts[0], parts[1], callback);
-	},
-
-	off: function off(eventId) {
-		eventId = String(eventId);
-
-		if (this._isEventNameWithNamespaceJustANamespace(eventId)) {
-			// Just a namespace.
-			this._itemContainer.remove(null, eventId.substr(1));
-		} else {
-			// Event name and possible namespace.
 			var parts = this._parseAndValidateEventId(eventId);
-			this._itemContainer.remove(parts[0], parts[1]);
+			var items = this._itemContainer.getItems(parts[0], parts[1]);
+			var args = Array.prototype.slice.call(arguments, 1);
+
+			_.each(items, function (item) {
+				item.callback.apply(null, args);
+			});
 		}
+
+		/**
+   * @param {String} eventId
+   * @param {Function} callback
+   */
+	}, {
+		key: 'on',
+		value: function on(eventId, callback) {
+			if (!callback) {
+				throw Error('An event callback should be provided.');
+			}
+
+			if (!_.isFunction(callback)) {
+				throw Error('An event callback should be a function.');
+			}
+
+			var parts = this._parseAndValidateEventId(eventId);
+
+			this._itemContainer.add(parts[0], parts[1], callback);
+		}
+	}, {
+		key: 'off',
+		value: function off(eventId) {
+			if (!arguments.length) {
+				this._itemContainer.clear();
+				return;
+			}
+
+			eventId = String(eventId);
+
+			if (!this._isEventIdJustANamespace(eventId)) {
+				// Event name and possible namespace.
+				var parts = this._parseAndValidateEventId(eventId);
+				this._itemContainer.remove(parts[0], parts[1]);
+			} else {
+				// Just a namespace.
+				this._itemContainer.remove(null, eventId.substr(1));
+			}
+		}
+	}]);
+
+	return Emitter;
+})();
+
+$$.Emitter.ItemContainer = (function () {
+	function EmitterItemContainer() {
+		_classCallCheck(this, EmitterItemContainer);
+
+		/* Items:
+   *
+   * {
+   *   eventName1: {
+   *     namespace1: [ { callback, *... }, ... ],
+   *     namespace2: [ ... ]
+   *     ...
+   *   },
+   *
+   *   eventName2: { ... }
+   *   ...
+   * }
+   */
+		this._items = {};
 	}
-};
 
-$$.Emitter.prototype.trigger = $$.Emitter.prototype.emit;
-
-$$.Emitter.ItemContainer = function () {
-	/* Items:
-  *
-  * {
-  *   eventName1: {
-  *     namespace1: [ { callback, *... }, ... ],
-  *     namespace2: [ ... ]
-  *     ...
-  *   },
-  *
-  *   eventName2: { ... }
-  *   ...
-  * }
-  */
-	this._items = {};
-};
-
-$$.Emitter.ItemContainer.prototype = {
 	/**
   * @param {String} eventName
-  * @param {String}|null namespace
+  * @param {String} namespace
   * @param {Function} callback
   */
-	add: function add(eventName, namespace, callback) {
-		eventName = String(eventName);
-		namespace = namespace == null ? '*' : String(namespace);
 
-		if (!this._items.hasOwnProperty(eventName)) {
-			this._items[eventName] = {};
-		}
-
-		if (!this._items[eventName].hasOwnProperty(namespace)) {
-			this._items[eventName][namespace] = [];
-		}
-
-		this._items[eventName][namespace].push({
-			callback: callback
-		});
-	},
-
-	/**
-  * @param {String} eventName
-  * @param {String}|null namespace
-  * @return {Array}
-  */
-	getItems: function getItems(eventName, namespace) {
-		eventName = String(eventName);
-
-		if (!this._items.hasOwnProperty(eventName)) {
-			return [];
-		}
-
-		if (namespace == null) {
-			// Return items for all namespaces of the event.
-
-			var arraysOfItems = _.values(this._items[eventName]);
-
-			return _.union.apply(null, arraysOfItems);
-		}
-
-		namespace = String(namespace);
-
-		if (!this._items[eventName].hasOwnProperty(namespace)) {
-			return [];
-		}
-
-		return this._items[eventName][namespace];
-	},
-
-	/**
-  * Removes by event name, by namespace or by both.
-  *
-  * @param {String}|null eventName
-  * @param {String}|null namespace
-  */
-	remove: function remove(eventName, namespace) {
-		if (eventName == null && namespace == null) {
-			throw Error('Only one of the arguments can be omitted.');
-		}
-
-		if (namespace == null) {
-			this.removeByEventName(eventName);
-		} else if (eventName == null) {
-			this.removeByNamespace(namespace);
-		} else {
-			// Both eventName and namespace are not null.
-
+	_createClass(EmitterItemContainer, [{
+		key: 'add',
+		value: function add(eventName, namespace, callback) {
 			eventName = String(eventName);
+			namespace = !namespace ? '*' : String(namespace);
+
+			if (!this._items.hasOwnProperty(eventName)) {
+				this._items[eventName] = {};
+			}
+
+			if (!this._items[eventName].hasOwnProperty(namespace)) {
+				this._items[eventName][namespace] = [];
+			}
+
+			this._items[eventName][namespace].push({
+				callback: callback
+			});
+		}
+
+		/**
+   * @param {String} eventName
+   * @param {String}|null namespace
+   * @return {Array}
+   */
+	}, {
+		key: 'getItems',
+		value: function getItems(eventName, namespace) {
+			eventName = String(eventName);
+
+			if (!this._items.hasOwnProperty(eventName)) {
+				return [];
+			}
+
+			if (!namespace) {
+				// Return items for all namespaces of the event.
+
+				var arraysOfItems = _.values(this._items[eventName]);
+
+				return _.union.apply(null, arraysOfItems);
+			}
+
 			namespace = String(namespace);
 
-			if (!this._items.hasOwnProperty(eventName) || !this._items[eventName].hasOwnProperty(namespace)) {
+			if (!this._items[eventName].hasOwnProperty(namespace)) {
+				return [];
+			}
+
+			return this._items[eventName][namespace];
+		}
+
+		/**
+   * Removes by event name, by namespace or by both.
+   *
+   * @param {String} eventName
+   * @param {String} namespace
+   */
+	}, {
+		key: 'remove',
+		value: function remove(eventName, namespace) {
+			if (!eventName && !namespace) {
+				throw Error('Only one of the arguments can be omitted.');
+			}
+
+			if (!namespace) {
+				this.removeByEventName(eventName);
+			} else if (!eventName) {
+				this.removeByNamespace(namespace);
+			} else {
+				// Both eventName and namespace are not null.
+
+				eventName = String(eventName);
+				namespace = String(namespace);
+
+				if (!this._items.hasOwnProperty(eventName) || !this._items[eventName].hasOwnProperty(namespace)) {
+					return;
+				}
+
+				delete this._items[eventName][namespace];
+			}
+		}
+
+		/**
+   * @param {String} eventName
+   */
+	}, {
+		key: 'removeByEventName',
+		value: function removeByEventName(eventName) {
+			eventName = String(eventName);
+
+			if (!this._items.hasOwnProperty(eventName)) {
 				return;
 			}
 
-			delete this._items[eventName][namespace];
-		}
-	},
-
-	/**
-  * @param {String} eventName
-  */
-	removeByEventName: function removeByEventName(eventName) {
-		eventName = String(eventName);
-
-		if (!this._items.hasOwnProperty(eventName)) {
-			return;
+			delete this._items[eventName];
 		}
 
-		delete this._items[eventName];
-	},
+		/**
+   * @param {String} namespace
+   */
+	}, {
+		key: 'removeByNamespace',
+		value: function removeByNamespace(namespace) {
+			namespace = String(namespace);
 
-	/**
-  * @param {String} namespace
-  */
-	removeByNamespace: function removeByNamespace(namespace) {
-		namespace = String(namespace);
+			_.each(this._items, function (itemsByNamespace) {
+				if (!itemsByNamespace.hasOwnProperty(namespace)) {
+					return;
+				}
 
-		_.each(this._items, function (itemsByNamespace) {
-			if (!itemsByNamespace.hasOwnProperty(namespace)) {
-				return;
-			}
+				delete itemsByNamespace[namespace];
+			});
+		}
+	}, {
+		key: 'clear',
+		value: function clear() {
+			this._items = {};
+		}
+	}]);
 
-			delete itemsByNamespace[namespace];
-		});
-	}
-};
+	return EmitterItemContainer;
+})();
 "use strict";
 
 $$.Simulation = $$.Simulation || {};
@@ -677,25 +685,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var Component = (function (_$$$Emitter) {
+var $$ = $$ || {};
+
+$$.Component = (function (_$$$Emitter) {
 	_inherits(Component, _$$$Emitter);
 
-	function Component() {
+	function Component(root, options) {
 		_classCallCheck(this, Component);
 
 		_get(Object.getPrototypeOf(Component.prototype), "constructor", this).call(this);
-		$$.Emitter.call(this);
 
-		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-			args[_key] = arguments[_key];
-		}
-
-		if (args.length === 1) {
-			this.root = args[0];
-		} else if (args.length === 2) {
-			this.root = args[0];
-			this.options = args[1];
-		}
+		this.root = root;
+		this.options = _.merge(this._defaultOptions, options);
 
 		this.initialize();
 	}
@@ -741,7 +742,11 @@ $$.GoogleAnalytics = {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var $$ = $$ || {};
 
@@ -752,81 +757,23 @@ var GMEventListener = GM.event.addListener;
  * @type {GoogleMap}
  */
 
-$$.GoogleMap = (function () {
+$$.GoogleMap = (function (_$$$Component) {
+	_inherits(GoogleMap, _$$$Component);
+
 	/**
   *
   * @param root
   * @param options
   */
 
-	function GoogleMap(root) {
-		var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
+	function GoogleMap(root, options) {
 		_classCallCheck(this, GoogleMap);
 
-		var defaultOptions = {
-			offset: {
-				top: false,
-				left: false
-			},
-			coordinates: [51.6753557, 38.9559867],
-			icon: {
-				url: '/assets/images/point.png',
-				size: [32, 48]
-			},
-			mapOptions: {
-				mapTypeId: !_.isUndefined(window.google) ? GM.MapTypeId.ROADMAP : '', //MapTypeId.SATELLITE, MapTypeId.HYBRID, MapTypeId.TERRAIN
-				maxZoom: 45,
-				zoom: 15,
-				minZoom: 0,
-				zoomControl: true,
-				overviewMapControl: true,
-				disableDefaultUI: false,
-				scrollwheel: false,
-				styles: [{
-					"featureType": "administrative",
-					"elementType": "labels.text.fill",
-					"stylers": [{ "color": "#444444" }]
-				}, {
-					"featureType": "landscape",
-					"elementType": "all",
-					"stylers": [{ "color": "#f2f2f2" }]
-				}, {
-					"featureType": "poi",
-					"elementType": "all",
-					"stylers": [{ "visibility": "off" }]
-				}, {
-					"featureType": "road",
-					"elementType": "all",
-					"stylers": [{ "saturation": -100 }, { "lightness": 45 }]
-				}, {
-					"featureType": "road.highway",
-					"elementType": "all",
-					"stylers": [{ "visibility": "simplified" }]
-				}, {
-					"featureType": "road.arterial",
-					"elementType": "labels.icon",
-					"stylers": [{ "visibility": "off" }]
-				}, {
-					"featureType": "transit",
-					"elementType": "all",
-					"stylers": [{ "visibility": "off" }]
-				}, {
-					"featureType": "water",
-					"elementType": "all",
-					"stylers": [{ "color": "#0088f6" }, { "visibility": "on" }]
-				}]
-			}
-		};
-
-		this.root = root;
-		this.options = _.merge(defaultOptions, options);
+		_get(Object.getPrototypeOf(GoogleMap.prototype), 'constructor', this).call(this, root, options);
 
 		this.MercatorProjection = null;
 		this.MapIcon = null;
 		this.MapCenter = null;
-
-		this.initialize();
 	}
 
 	_createClass(GoogleMap, [{
@@ -834,7 +781,7 @@ $$.GoogleMap = (function () {
 		value: function initialize() {
 			"use strict";
 
-			this._ready();
+			_get(Object.getPrototypeOf(GoogleMap.prototype), 'initialize', this).call(this);
 		}
 	}, {
 		key: 'setMarker',
@@ -928,6 +875,66 @@ $$.GoogleMap = (function () {
 			this.icon = this.options.icon;
 		}
 	}, {
+		key: '_defaultOptions',
+		get: function get() {
+			"use strict";
+
+			return {
+				offset: {
+					top: false,
+					left: false
+				},
+				coordinates: [51.6753557, 38.9559867],
+				icon: {
+					url: '/assets/images/point.png',
+					size: [32, 48]
+				},
+				mapOptions: {
+					mapTypeId: !_.isUndefined(window.google) ? GM.MapTypeId.ROADMAP : '', //MapTypeId.SATELLITE, MapTypeId.HYBRID, MapTypeId.TERRAIN
+					maxZoom: 45,
+					zoom: 15,
+					minZoom: 0,
+					zoomControl: true,
+					overviewMapControl: true,
+					disableDefaultUI: false,
+					scrollwheel: false,
+					styles: [{
+						"featureType": "administrative",
+						"elementType": "labels.text.fill",
+						"stylers": [{ "color": "#444444" }]
+					}, {
+						"featureType": "landscape",
+						"elementType": "all",
+						"stylers": [{ "color": "#f2f2f2" }]
+					}, {
+						"featureType": "poi",
+						"elementType": "all",
+						"stylers": [{ "visibility": "off" }]
+					}, {
+						"featureType": "road",
+						"elementType": "all",
+						"stylers": [{ "saturation": -100 }, { "lightness": 45 }]
+					}, {
+						"featureType": "road.highway",
+						"elementType": "all",
+						"stylers": [{ "visibility": "simplified" }]
+					}, {
+						"featureType": "road.arterial",
+						"elementType": "labels.icon",
+						"stylers": [{ "visibility": "off" }]
+					}, {
+						"featureType": "transit",
+						"elementType": "all",
+						"stylers": [{ "visibility": "off" }]
+					}, {
+						"featureType": "water",
+						"elementType": "all",
+						"stylers": [{ "color": "#0088f6" }, { "visibility": "on" }]
+					}]
+				}
+			};
+		}
+	}, {
 		key: 'icon',
 		set: function set(value) {
 			if (value) {
@@ -1007,7 +1014,7 @@ $$.GoogleMap = (function () {
 	}]);
 
 	return GoogleMap;
-})();
+})($$.Component);
 
 $$.MercatorProjection = (function () {
 	function MercatorProjection(map) {
@@ -1058,33 +1065,299 @@ $$.MercatorProjection = (function () {
 
 	return MercatorProjection;
 })();
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var $$ = $$ || {};
+
+$$.SimpleSlider = (function (_$$$Component) {
+	_inherits(SimpleSlider, _$$$Component);
+
+	function SimpleSlider(root, options) {
+		_classCallCheck(this, SimpleSlider);
+
+		_get(Object.getPrototypeOf(SimpleSlider.prototype), "constructor", this).call(this, root, options);
+
+		this.isAnimated = false;
+		/* ширина слайда с отступами */
+		this.slideWidth = this.nodes.list.find('.item').outerWidth(true);
+
+		/* смещение слайдера */
+		this.newLeftPos = -this.slideWidth;
+	}
+
+	_createClass(SimpleSlider, [{
+		key: "initialize",
+		value: function initialize() {
+			"use strict";
+
+			_get(Object.getPrototypeOf(SimpleSlider.prototype), "initialize", this).call(this);
+		}
+	}, {
+		key: "_cacheNodes",
+		value: function _cacheNodes() {
+			"use strict";
+
+			this.nodes = {
+				list: this.root.find('.item-list'),
+				items: this.root.find('.item'),
+				prevNav: this.root.find('.js-prev'),
+				nextNav: this.root.find('.js-next')
+			};
+		}
+	}, {
+		key: "_bindEvents",
+		value: function _bindEvents() {
+			"use strict";
+
+			var _this = this;
+
+			this.nodes.prevNav.on('click', function (event) {
+				event.preventDefault();
+
+				_this.setPrev();
+			});
+
+			this.nodes.nextNav.on('click', function (event) {
+				event.preventDefault();
+
+				_this.setNext();
+			});
+		}
+	}, {
+		key: "setNext",
+		value: function setNext() {
+			"use strict";
+
+			var _this2 = this;
+
+			var bounce = new Bounce();
+
+			bounce.translate({
+				from: { x: 0, y: 0 },
+				to: { x: this.newLeftPos, y: 0 },
+				duration: this.options.speed,
+				bounces: 0,
+				stiffness: 5
+			});
+
+			this.nodes.list.find('.item:first').appendTo(this.nodes.list);
+
+			this._updateItems(true);
+
+			bounce.applyTo(this.nodes.list).then(function () {
+				_this2.trigger('slideChanged');
+			});
+		}
+	}, {
+		key: "setPrev",
+		value: function setPrev() {
+			"use strict";
+
+			var _this3 = this;
+
+			var bounce = new Bounce();
+
+			this.nodes.list.find('.item:last').prependTo(this.nodes.list);
+
+			bounce.translate({
+				from: { x: 2 * this.newLeftPos, y: 0 },
+				to: { x: this.newLeftPos, y: 0 },
+				duration: this.options.speed,
+				bounces: 0,
+				stiffness: 5
+			});
+
+			this._updateItems(true);
+
+			bounce.applyTo(this.nodes.list).then(function () {
+				_this3.trigger('slideChanged');
+			});
+		}
+	}, {
+		key: "_updateItems",
+		value: function _updateItems() {
+			"use strict";
+
+			var next = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+			this.nodes.items.removeClass('prev active next');
+			this.root.find('.item').eq(0).addClass('prev');
+			this.root.find('.item').eq(1).addClass('active');
+			this.root.find('.item').eq(2).addClass('next');
+
+			this.resize();
+
+			this.trigger('slideChanged');
+		}
+	}, {
+		key: "resize",
+		value: function resize() {
+			"use strict";
+
+			var _this4 = this;
+
+			$$.window.on('resize', function () {
+				var partPhoto = Math.ceil(($$.window.width() - _this4.options.containerWidth) / 2);
+
+				_this4.nodes.list.css({
+					marginLeft: "-" + (_this4.nodes.items.filter('.prev').width() - partPhoto) + "px"
+				});
+			});
+
+			$$.window.resize();
+		}
+	}, {
+		key: "_ready",
+		value: function _ready() {
+			"use strict";
+
+			var _this5 = this;
+
+			this.nodes.items.each(function (index) {
+				var item = $(this);
+				var image = item.find('img');
+
+				if (image.width() > image.height()) {
+					item.addClass('horizontal');
+				} else if (image.width() < image.height()) {
+					item.addClass('vertical');
+				}
+			});
+
+			var bounce = new Bounce();
+
+			this.nodes.list.find('.item:last').prependTo(this.nodes.list);
+
+			var newPos = this.nodes.items.eq(0).outerWidth(true);
+
+			bounce.translate({
+				from: { x: 0, y: 0 },
+				to: { x: -newPos, y: 0 },
+				duration: 1,
+				bounces: 0,
+				stiffness: 5
+			});
+
+			this._updateItems(true);
+
+			bounce.applyTo(this.nodes.list).then(function () {
+				_this5.trigger('slideChanged');
+			});
+
+			if (this.options.isCyclical) {
+				this.interval = setInterval(function () {
+					_this5.setNext();
+				}, this.options.isCyclicalInterval);
+			}
+		}
+	}, {
+		key: "_defaultOptions",
+		get: function get() {
+			"use strict";
+
+			return {
+				speed: 2000,
+				containerWidth: 1180,
+				isCyclical: false,
+				isCyclicalInterval: 2000
+			};
+		}
+	}]);
+
+	return SimpleSlider;
+})($$.Component);
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var $$ = $$ || {};
+
+$$.TestClass = (function (_$$$Component) {
+	_inherits(TestClass, _$$$Component);
+
+	function TestClass(root, options) {
+		_classCallCheck(this, TestClass);
+
+		_get(Object.getPrototypeOf(TestClass.prototype), "constructor", this).call(this, root, options);
+	}
+
+	_createClass(TestClass, [{
+		key: "initialize",
+		value: function initialize() {
+			"use strict";
+			_get(Object.getPrototypeOf(TestClass.prototype), "initialize", this).call(this);
+		}
+	}, {
+		key: "_cacheNodes",
+		value: function _cacheNodes() {
+			this.nodes = {};
+		}
+	}, {
+		key: "_bindEvents",
+		value: function _bindEvents() {}
+	}, {
+		key: "_ready",
+		value: function _ready() {
+			"use strict";
+		}
+	}, {
+		key: "_defaultOptions",
+		get: function get() {
+			"use strict";
+
+			return {};
+		}
+	}]);
+
+	return TestClass;
+})($$.Component);
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var $$ = $$ || {};
 
-$$.VimeoPlayer = (function () {
+$$.VimeoPlayer = (function (_$$$Component) {
+	_inherits(VimeoPlayer, _$$$Component);
+
 	function VimeoPlayer(root, options) {
 		_classCallCheck(this, VimeoPlayer);
 
-		this.root = root;
-
-		this.options = {};
-
-		_.assign(this.options, options);
+		_get(Object.getPrototypeOf(VimeoPlayer.prototype), 'constructor', this).call(this, root, options);
 
 		this.playerState = 0;
-
-		this._createScript();
-		this._createPlayer();
-
-		this._ready();
 	}
 
 	_createClass(VimeoPlayer, [{
+		key: 'initialize',
+		value: function initialize() {
+			"use strict";
+
+			this._createScript();
+			this._createPlayer();
+
+			_get(Object.getPrototypeOf(VimeoPlayer.prototype), 'initialize', this).call(this);
+		}
+	}, {
 		key: '_createScript',
 		value: function _createScript() {
 			"use strict";
@@ -1104,7 +1377,7 @@ $$.VimeoPlayer = (function () {
 				if (!_.isUndefined(window.$f)) {
 					clearInterval(interval);
 
-					_this.root.trigger('APIReady');
+					_this.trigger('APIReady');
 				}
 			}, 1);
 		}
@@ -1118,29 +1391,31 @@ $$.VimeoPlayer = (function () {
 			var rootClass = this.root.attr('class');
 			var id = _.uniqueId('player_');
 
-			this.root.on('APIReady', function () {
+			this.on('APIReady', function () {
 				var iframe = $('\n\t\t\t<iframe id="' + id + '"\n\t\t\t\tclass="' + rootClass + '"\n\t\t\t\tsrc="https://player.vimeo.com/video/' + _this2.options.videoId + '?api=1&player_id=' + id + '"\n\t\t\t\twidth="' + _this2.options.width + '"\n\t\t\t\theight="' + _this2.options.height + '"\n\t\t\t\tframeborder="0"\n\t\t\t\twebkitallowfullscreen\n\t\t\t\tmozallowfullscreen\n\t\t\t\tallowfullscreen>\n\t\t\t</iframe>\n\t\t\t');
 
-				_this2.root.append(iframe);
+				_this2.root.replaceWith(function () {
+					return iframe;
+				});
 
-				_this2.player = $f(_this2.root.find('iframe').get(0));
+				_this2.player = $f(iframe.get(0));
 
 				_this2.player.addEvent('ready', function () {
-					_this2.root.trigger('PlayerCreated');
+					_this2.trigger('PlayerCreated');
 
 					_this2.player.addEvent('play', function () {
 						_this2.playerState = 1;
-						_this2.root.trigger('PlayerStateChange');
+						_this2.trigger('PlayerStateChange');
 					});
 
 					_this2.player.addEvent('pause', function () {
 						_this2.playerState = 2;
-						_this2.root.trigger('PlayerStateChange');
+						_this2.trigger('PlayerStateChange');
 					});
 
 					_this2.player.addEvent('finish', function () {
 						_this2.playerState = 0;
-						_this2.root.trigger('PlayerStateChange');
+						_this2.trigger('PlayerStateChange');
 					});
 				});
 			});
@@ -1195,6 +1470,17 @@ $$.VimeoPlayer = (function () {
 		key: '_ready',
 		value: function _ready() {
 			"use strict";
+		}
+	}, {
+		key: '_defaultOptions',
+		get: function get() {
+			"use strict";
+
+			return {
+				width: '640',
+				height: '360',
+				videoId: 'M7lc1UVf-VE'
+			};
 		}
 	}, {
 		key: 'duration',
@@ -1267,203 +1553,7 @@ $$.VimeoPlayer = (function () {
 	}]);
 
 	return VimeoPlayer;
-})();
-'use strict';
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var $$ = $$ || {};
-
-$$.VimeoPlayer2 = (function () {
-	function VimeoPlayer2(root, options) {
-		_classCallCheck(this, VimeoPlayer2);
-
-		this.root = root;
-
-		this.options = {};
-
-		_.assign(this.options, options);
-
-		this.playerOrigin = '*';
-		this.playerObject = {};
-		this._createPlayer();
-		this._cacheNodes();
-		this._bindEvents();
-		this._ready();
-	}
-
-	_createClass(VimeoPlayer2, [{
-		key: '_createPlayer',
-		value: function _createPlayer() {
-			"use strict";
-			var rootClass = this.root.attr('class');
-			var id = _.uniqueId('player_');
-
-			var iframe = $('\n\t\t\t<iframe id="' + id + '"\n\t\t\t\tclass="' + rootClass + '"\n\t\t\t\tsrc="https://player.vimeo.com/video/' + this.options.videoId + '?api=1&player_id=' + id + '"\n\t\t\t\twidth="' + this.options.width + '"\n\t\t\t\theight="' + this.options.height + '"\n\t\t\t\tframeborder="0"\n\t\t\t\twebkitallowfullscreen\n\t\t\t\tmozallowfullscreen\n\t\t\t\tallowfullscreen>\n\t\t\t</iframe>\n\t\t\t');
-
-			this.root.replaceWith(function () {
-				return iframe;
-			});
-
-			this.player = iframe;
-		}
-	}, {
-		key: '_cacheNodes',
-		value: function _cacheNodes() {
-			this.nodes = {};
-		}
-	}, {
-		key: '_onMessageReceived',
-		value: function _onMessageReceived(event) {
-			// Handle messages from the vimeo player only
-			if (!/^https?:\/\/player.vimeo.com/.test(event.origin)) {
-				return false;
-			}
-
-			if (this.playerOrigin === '*') {
-				this.playerOrigin = event.origin;
-			}
-
-			var data = JSON.parse(event.data);
-
-			if (data.event === 'ready') {
-				this._post('addEventListener', 'loadProgress');
-				this._post('addEventListener', 'playProgress');
-				this._post('addEventListener', 'play');
-				this._post('addEventListener', 'pause');
-				this._post('addEventListener', 'finish');
-				this._post('addEventListener', 'seek');
-
-				this.root.trigger('PlayerCreated');
-			}
-
-			if (!_.isUndefined(data.method)) {
-				this.playerObject[data.method] = data.value;
-				console.log(this.playerObject.getDuration);
-			}
-
-			/*switch (data.event) {
-    case 'ready':
-    break;
-   		 case 'loadProgress':
-    this.root.trigger('loadProgress', {
-    player_id: data.player_id,
-    data:      data.data
-    });
-    break;
-    case 'playProgress':
-    this.root.trigger('playProgress', {
-    player_id: data.player_id,
-    data:      data.data
-    });
-    break;
-   		 case 'play':
-    this.root.trigger('PlayerStateChange');
-    this.playerState = 1;
-   		 break;
-   		 case 'pause':
-    this.root.trigger('PlayerStateChange');
-    this.playerState = 2;
-    break;
-   		 case 'finish':
-    this.root.trigger('PlayerStateChange');
-    this.playerState = 0;
-    break;
-   		 case 'seek':
-    this.root.trigger('seek', {
-    player_id: data.player_id,
-    data:      data.data
-    });
-   		 break;
-    }*/
-		}
-	}, {
-		key: '_bindEvents',
-		value: function _bindEvents() {
-			"use strict";
-			if (window.addEventListener) {
-				window.addEventListener('message', _.bind(this._onMessageReceived, this), false);
-			} else {
-				window.attachEvent('onmessage', _.bind(this._onMessageReceived, this), false);
-			}
-		}
-	}, {
-		key: '_post',
-		value: function _post(action, value) {
-			"use strict";
-			var data = {
-				method: action
-			};
-
-			if (value) {
-				data.value = value;
-			}
-
-			var message = JSON.stringify(data);
-
-			this.player.get(0).contentWindow.postMessage(message, this.playerOrigin);
-		}
-	}, {
-		key: 'playVideo',
-		value: function playVideo() {
-			"use strict";
-			this._post('play');
-		}
-	}, {
-		key: 'pauseVideo',
-		value: function pauseVideo() {
-			"use strict";
-			this._post('pause');
-		}
-	}, {
-		key: 'stopVideo',
-		value: function stopVideo() {
-			"use strict";
-			this._post('stop');
-		}
-	}, {
-		key: '_ready',
-		value: function _ready() {
-			"use strict";
-		}
-	}, {
-		key: 'duration',
-		get: function get() {
-			"use strict";
-			this._post('getDuration');
-			return this.playerObject.getDuration;
-		}
-	}, {
-		key: 'CurrentTime',
-		get: function get() {
-			"use strict";
-
-			return this._post('getCurrentTime');
-		}
-	}, {
-		key: 'volume',
-		get: function get() {
-			"use strict";
-			return this._post('getVolume');
-		},
-		set: function set(volume) {
-			"use strict";
-			if (parseInt(volume) > 100) {
-				volume = 100;
-			}
-
-			if (parseInt(volume) < 0) {
-				volume = 0;
-			}
-
-			this._post('setVolume', volume);
-		}
-	}]);
-
-	return VimeoPlayer2;
-})();
+})($$.Component);
 "use strict";
 
 var $$ = $$ || {};
@@ -1479,54 +1569,43 @@ $$.YandexMetrika = {
 };
 'use strict';
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var $$ = $$ || {};
 
-$$.YouTube = (function () {
+$$.YouTube = (function (_$$$Component) {
+	_inherits(YouTube, _$$$Component);
+
 	function YouTube(root, options) {
 		_classCallCheck(this, YouTube);
 
-		this.root = root;
+		_get(Object.getPrototypeOf(YouTube.prototype), 'constructor', this).call(this, root, options);
 
-		this.options = {
-			width: '640',
-			height: '360',
-			playerVars: {
-				autoplay: 0,
-				controls: 0,
-				disablekb: 1,
-				enablejsapi: 1,
-				end: '',
-				loop: 0,
-				modestbranding: 1,
-				rel: 0
-			},
-			videoId: 'M7lc1UVf-VE'
-		};
-
-		_.merge(this.options, options);
-
+		this.player = undefined;
 		this.YT = undefined;
-
-		this._cacheNodes();
-		this._bindEvents();
-		this._createScript();
-		this._ready();
 	}
 
-	/**
-  * Загружаем скрипт в браузер
-  * @private
-  */
-
 	_createClass(YouTube, [{
+		key: 'initialize',
+		value: function initialize() {
+			"use strict";
+			this._createScript();
+
+			_get(Object.getPrototypeOf(YouTube.prototype), 'initialize', this).call(this);
+		}
+
+		/**
+   * Загружаем скрипт в браузер
+   * @private
+   */
+
+	}, {
 		key: '_createScript',
 		value: function _createScript() {
 			"use strict";
@@ -1547,7 +1626,7 @@ $$.YouTube = (function () {
 					if (YT.loaded) {
 						clearInterval(interval);
 						_this.YT = YT;
-						_this.root.trigger('YouTubeIframeAPIReady');
+						_this.trigger('YouTubeIframeAPIReady');
 					}
 				}
 			}, 1);
@@ -1564,13 +1643,13 @@ $$.YouTube = (function () {
 
 			var _this2 = this;
 
-			this.root.on('YouTubeIframeAPIReady', function () {
+			this.on('YouTubeIframeAPIReady', function () {
 				_this2._createPlayer();
 			});
 
-			this.root.on('PlayerCreated', function () {});
+			this.on('PlayerCreated', function () {});
 
-			this.root.on('PlayerStateChange', function (event, data) {});
+			this.on('PlayerStateChange', function (event, data) {});
 		}
 	}, {
 		key: '_createPlayer',
@@ -1582,10 +1661,10 @@ $$.YouTube = (function () {
 			var playerOptions = {
 				events: {
 					'onReady': function onReady(event) {
-						_this3.root.trigger('PlayerCreated');
+						_this3.trigger('PlayerCreated');
 					},
 					'onStateChange': function onStateChange(event) {
-						_this3.root.trigger('PlayerStateChange', event);
+						_this3.trigger('PlayerStateChange', event);
 					}
 				}
 			};
@@ -1604,10 +1683,31 @@ $$.YouTube = (function () {
 		value: function _ready() {
 			"use strict";
 		}
+	}, {
+		key: '_defaultOptions',
+		get: function get() {
+			"use strict";
+
+			return {
+				width: '640',
+				height: '360',
+				playerVars: {
+					autoplay: 0,
+					controls: 0,
+					disablekb: 1,
+					enablejsapi: 1,
+					end: '',
+					loop: 0,
+					modestbranding: 1,
+					rel: 0
+				},
+				videoId: 'M7lc1UVf-VE'
+			};
+		}
 	}]);
 
 	return YouTube;
-})();
+})($$.Component);
 
 $$.YouTubePlayer = (function (_$$$YouTube) {
 	_inherits(YouTubePlayer, _$$$YouTube);
@@ -1618,6 +1718,8 @@ $$.YouTubePlayer = (function (_$$$YouTube) {
 		_classCallCheck(this, YouTubePlayer);
 
 		_get(Object.getPrototypeOf(YouTubePlayer.prototype), 'constructor', this).call(this, root, options);
+
+		console.log(this);
 	}
 
 	_createClass(YouTubePlayer, [{
@@ -1732,6 +1834,7 @@ var Application = (function () {
 		this._initMap();
 		this._initYouTubePlayer();
 		this._initVimeoPlayer();
+		this._initSimpleSlider();
 	}
 
 	_createClass(Application, [{
@@ -1821,7 +1924,7 @@ var Application = (function () {
 
 				var form = $('.js-form-video');
 
-				player.root.on('PlayerCreated', function () {
+				player.on('PlayerCreated', function () {
 					dimmer.removeClass('active');
 
 					$('.js-progress-time').progress({
@@ -1834,7 +1937,7 @@ var Application = (function () {
 
 					$('.js-all-time').text(allTime.minutes + ':' + allTime.sec);
 
-					player.root.on('PlayerStateChange', function () {
+					player.on('PlayerStateChange', function () {
 
 						if (player.playerState === 1) {
 							interval = setInterval(function () {
@@ -1944,7 +2047,7 @@ var Application = (function () {
 
 				var form = $('.js-form-video');
 
-				player.root.on('PlayerCreated', function () {
+				player.on('PlayerCreated', function () {
 					dimmer.removeClass('active');
 
 					$('.js-progress-time').progress({
@@ -1966,7 +2069,7 @@ var Application = (function () {
 						$(this).addClass('active').siblings().removeClass('active');
 					});
 
-					player.root.on('PlayerStateChange', function () {
+					player.on('PlayerStateChange', function () {
 						var currentTime = 0;
 						var allTime = 0;
 						var duration = 0;
@@ -2080,6 +2183,23 @@ var Application = (function () {
 							});
 						});
 					});
+				});
+			});
+		}
+	}, {
+		key: '_initSimpleSlider',
+		value: function _initSimpleSlider() {
+			"use strict";
+
+			$('.js-simple-slider').each(function () {
+				var slider = new $$.SimpleSlider($(this), {
+					isCyclical: false
+				});
+
+				slider.nodes.items.each(function (index) {
+					var item = $(this);
+
+					item.append('<div class="index"><span>' + index + '</span></div>');
 				});
 			});
 		}

@@ -30553,3 +30553,87 @@ Icon classes can be used entirely standalone. They are named after their origina
   height: 54px;
 }
 
+
+.b-simple-slider {
+  position: relative;
+  width: 100%;
+  height: 458px;
+}
+.b-simple-slider-inner {
+  position: relative;
+  overflow: hidden;
+}
+.b-simple-slider .item-list {
+  position: relative;
+  width: 10000px;
+  margin-left: -198px;
+  font-size: 0;
+}
+.b-simple-slider .item-list > * {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: medium;
+}
+.b-simple-slider .item-list .item {
+  position: relative;
+  width: 600px;
+  height: 458px;
+  transition: width 0.3s 0s ease-in;
+  text-align: center;
+  /*	&.prev {
+					width: 560px;
+				}
+
+				&.active {
+					width: 600px;
+				}*/
+}
+.b-simple-slider .item-list .item img {
+  width: auto;
+  height: auto;
+}
+.b-simple-slider .item-list .item .index {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.b-simple-slider .item-list .item .index span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  color: #ffffff;
+  font-size: 48px;
+}
+.b-simple-slider .item-list .item.horizontal img {
+  width: 100%;
+  height: auto;
+}
+.b-simple-slider .item-list .item.vertical img {
+  width: auto;
+  height: 100%;
+}
+.b-simple-slider .navigation {
+  opacity: 1;
+  position: absolute;
+  top: 50%;
+  margin-top: -18px;
+  font-size: 36px;
+  text-decoration: none;
+  color: red;
+  transition: opacity 0.3s 0s ease-in;
+  z-index: 5;
+}
+.b-simple-slider .navigation.prev {
+  left: 0;
+}
+.b-simple-slider .navigation.next {
+  right: 0;
+}
+.b-simple-slider .navigation:hover {
+  opacity: .6;
+}

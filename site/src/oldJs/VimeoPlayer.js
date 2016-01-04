@@ -1,29 +1,19 @@
 var $$ = $$ || {};
 
-$$.VimeoPlayer = class VimeoPlayer extends $$.Component {
+$$.VimeoPlayer = class VimeoPlayer {
 	constructor (root, options) {
-		super(root, options);
+		this.root = root;
+
+		this.options = {};
+
+		_.assign(this.options, options);
 
 		this.playerState = 0;
-	}
-
-	get _defaultOptions () {
-		"use strict";
-
-		return {
-			width:   '640',
-			height:  '360',
-			videoId: 'M7lc1UVf-VE'
-		}
-	}
-
-	initialize () {
-		"use strict";
 
 		this._createScript();
 		this._createPlayer();
 
-		super.initialize();
+		this._ready();
 	}
 
 	_createScript () {
@@ -42,7 +32,7 @@ $$.VimeoPlayer = class VimeoPlayer extends $$.Component {
 			if (!_.isUndefined(window.$f)) {
 				clearInterval(interval);
 
-				this.trigger('APIReady');
+				this.root.trigger('APIReady');
 			}
 		}, 1);
 	}
@@ -52,7 +42,7 @@ $$.VimeoPlayer = class VimeoPlayer extends $$.Component {
 		let rootClass = this.root.attr('class');
 		let id = _.uniqueId('player_');
 
-		this.on('APIReady', () => {
+		this.root.on('APIReady', () => {
 			let iframe = $(`
 			<iframe id="${id}"
 				class="${rootClass}"
@@ -66,28 +56,26 @@ $$.VimeoPlayer = class VimeoPlayer extends $$.Component {
 			</iframe>
 			`);
 
-			this.root.replaceWith(() => {
-				return iframe;
-			});
+			this.root.append(iframe);
 
-			this.player = $f(iframe.get(0));
+			this.player = $f(this.root.find('iframe').get(0));
 
 			this.player.addEvent('ready', () => {
-				this.trigger('PlayerCreated');
+				this.root.trigger('PlayerCreated');
 
 				this.player.addEvent('play', () => {
 					this.playerState = 1;
-					this.trigger('PlayerStateChange');
+					this.root.trigger('PlayerStateChange');
 				});
 
 				this.player.addEvent('pause', () => {
 					this.playerState = 2;
-					this.trigger('PlayerStateChange');
+					this.root.trigger('PlayerStateChange');
 				});
 
 				this.player.addEvent('finish', () => {
 					this.playerState = 0;
-					this.trigger('PlayerStateChange');
+					this.root.trigger('PlayerStateChange');
 				});
 			});
 		});
@@ -111,6 +99,7 @@ $$.VimeoPlayer = class VimeoPlayer extends $$.Component {
 
 	_bindEvents () {
 		"use strict";
+
 	}
 
 	playVideo () {
