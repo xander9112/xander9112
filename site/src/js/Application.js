@@ -215,7 +215,7 @@ class Application {
 
 			let form = $('.js-form-video');
 
-			$('body').on('PlayerCreated', function () {
+			player.root.on('PlayerCreated', function () {
 				dimmer.removeClass('active');
 
 				$('.js-progress-time').progress({
