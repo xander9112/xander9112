@@ -8,13 +8,11 @@ $$.VimeoPlayer = class VimeoPlayer {
 
 		_.assign(this.options, options);
 
-		this.playerOrigin = '*';
-		this.playerObject = {};
+		this.playerState = 0;
 
 		this._createScript();
 		this._createPlayer();
-		//this._cacheNodes();
-		//this._bindEvents();
+
 		this._ready();
 	}
 
@@ -33,6 +31,7 @@ $$.VimeoPlayer = class VimeoPlayer {
 		var interval = setInterval(() => {
 			if (!_.isUndefined(window.$f)) {
 				clearInterval(interval);
+
 				this.root.trigger('APIReady');
 			}
 		}, 1);
@@ -57,14 +56,27 @@ $$.VimeoPlayer = class VimeoPlayer {
 			</iframe>
 			`);
 
-			this.root.replaceWith(() => {
-				return iframe;
-			});
+			this.root.append(iframe);
 
-			this.player = $f(iframe.get(0));
+			this.player = $f(this.root.find('iframe').get(0));
 
 			this.player.addEvent('ready', () => {
-				$('body').trigger('PlayerCreated');
+				this.root.trigger('PlayerCreated');
+
+				this.player.addEvent('play', () => {
+					this.playerState = 1;
+					this.root.trigger('PlayerStateChange');
+				});
+
+				this.player.addEvent('pause', () => {
+					this.playerState = 2;
+					this.root.trigger('PlayerStateChange');
+				});
+
+				this.player.addEvent('finish', () => {
+					this.playerState = 0;
+					this.root.trigger('PlayerStateChange');
+				});
 			});
 		});
 	}
@@ -76,132 +88,60 @@ $$.VimeoPlayer = class VimeoPlayer {
 	get duration () {
 		"use strict";
 
-		this.player.api('getDuration', function (value) {
-			return value;
+		let duration = new Promise((resolve, reject) => {
+			this.player.api('getDuration', function (value) {
+				resolve(value);
+			});
 		});
-	}
 
-	_onMessageReceived (event) {
-		// Handle messages from the vimeo player only
-		if (!(/^https?:\/\/player.vimeo.com/).test(event.origin)) {
-			return false;
-		}
-
-		if (this.playerOrigin === '*') {
-			this.playerOrigin = event.origin;
-		}
-
-		var data = JSON.parse(event.data);
-
-		if (data.event === 'ready') {
-			this._post('addEventListener', 'loadProgress');
-			this._post('addEventListener', 'playProgress');
-			this._post('addEventListener', 'play');
-			this._post('addEventListener', 'pause');
-			this._post('addEventListener', 'finish');
-			this._post('addEventListener', 'seek');
-
-			this.root.trigger('PlayerCreated');
-		}
-
-		if (!_.isUndefined(data.method)) {
-			this.playerObject[ data.method ] = data.value;
-			console.log(this.playerObject.getDuration);
-		}
-
-		/*switch (data.event) {
-		 case 'ready':
-		 break;
-
-		 case 'loadProgress':
-		 this.root.trigger('loadProgress', {
-		 player_id: data.player_id,
-		 data:      data.data
-		 });
-		 break;
-		 case 'playProgress':
-		 this.root.trigger('playProgress', {
-		 player_id: data.player_id,
-		 data:      data.data
-		 });
-		 break;
-
-		 case 'play':
-		 this.root.trigger('PlayerStateChange');
-		 this.playerState = 1;
-
-		 break;
-
-		 case 'pause':
-		 this.root.trigger('PlayerStateChange');
-		 this.playerState = 2;
-		 break;
-
-		 case 'finish':
-		 this.root.trigger('PlayerStateChange');
-		 this.playerState = 0;
-		 break;
-
-		 case 'seek':
-		 this.root.trigger('seek', {
-		 player_id: data.player_id,
-		 data:      data.data
-		 });
-
-		 break;
-		 }*/
+		return duration;
 	}
 
 	_bindEvents () {
 		"use strict";
-		if (window.addEventListener) {
-			window.addEventListener('message', _.bind(this._onMessageReceived, this), false);
-		}
-		else {
-			window.attachEvent('onmessage', _.bind(this._onMessageReceived, this), false);
-		}
 
-	}
-
-	_post (action, value) {
-		"use strict";
-		let data = {
-			method: action
-		};
-
-		if (value) {
-			data.value = value;
-		}
-
-		var message = JSON.stringify(data);
-
-		this.player.get(0).contentWindow.postMessage(message, this.playerOrigin);
 	}
 
 	playVideo () {
 		"use strict";
-		this._post('play');
+
+		this.player.api('play');
 	}
 
 	pauseVideo () {
 		"use strict";
-		this._post('pause');
+
+		this.player.api('pause');
 	}
 
 	stopVideo () {
 		"use strict";
-		this._post('stop');
+
+		this.player.api('unload');
 	}
 
 	get CurrentTime () {
 		"use strict";
 
-		return this._post('getCurrentTime');
+		let promise = new Promise((resolve, reject) => {
+			this.player.api('getCurrentTime', function (value) {
+				resolve(value);
+			});
+		});
+
+		return promise;
 	}
 
 	get volume () {
 		"use strict";
-		return this._post('getVolume');
+
+		let promise = new Promise((resolve, reject) => {
+			this.player.api('getVolume', function (value) {
+				resolve(value);
+			});
+		});
+
+		return promise;
 	}
 
 	set volume (volume) {
@@ -214,9 +154,30 @@ $$.VimeoPlayer = class VimeoPlayer {
 			volume = 0;
 		}
 
-		this._post('setVolume', volume);
+		this.player.api('setVolume', volume);
 	}
 
+	set mute (isMute) {
+		"use strict";
+
+		if (isMute) {
+			this.player.api('setVolume', 0);
+		} else {
+			this.player.api('setVolume', 1);
+		}
+	}
+
+	isMuted () {
+		"use strict";
+
+		let promise = new Promise((resolve, reject) => {
+			this.player.api('getVolume', function (value) {
+				resolve(value === 0);
+			});
+		});
+
+		return promise;
+	}
 
 	_ready () {
 		"use strict";

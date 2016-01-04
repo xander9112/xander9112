@@ -224,107 +224,135 @@ class Application {
 
 				var interval = null;
 
-				//let allTime = $$.secondsToTime(player.duration);
+				player.duration.then((resolve) => {
+					let allTime = $$.secondsToTime(resolve);
 
-				console.log(player.duration);
+					$('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
+				});
 
-				/*
-				 $('.js-all-time').text(`${allTime.minutes}:${allTime.sec}`);
+				form.on('click', '.js-play', function (event) {
+					event.preventDefault();
+					player.playVideo();
 
-				 player.root.on('PlayerStateChange', function () {
-
-				 if (player.playerState === 1) {
-				 interval = setInterval(() => {
-				 let currentTime = parseInt(player.CurrentTime);
-				 let duration = parseInt(player.duration);
-
-				 let allTime = $$.secondsToTime(player.CurrentTime);
-				 $('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
-
-				 $('.js-progress-time').progress({
-				 percent: parseInt(((currentTime / duration) * 100))
-				 });
-				 }, 1000);
-				 } else {
-				 clearInterval(interval);
-				 }
+					$(this).addClass('active').siblings().removeClass('active');
+				});
 
 
-				 });
+				player.root.on('PlayerStateChange', function () {
+					let currentTime = 0;
+					let allTime = 0;
+					let duration = 0;
 
-				 form.on('click', '.js-play', function (event) {
-				 event.preventDefault();
-				 player.playVideo();
+					if (player.playerState === 1) {
+						interval = setInterval(() => {
+							player.CurrentTime.then((currentTime) => {
+								player.duration.then((duration) => {
+									currentTime = parseInt(currentTime);
+									allTime = $$.secondsToTime(currentTime);
+									duration = parseInt(duration);
 
-				 $(this).addClass('active').siblings().removeClass('active');
-				 });
+									$('.js-current-time').text(`${allTime.minutes}:${allTime.sec}`);
 
-				 form.on('click', '.js-pause', function (event) {
-				 event.preventDefault();
-				 player.pauseVideo();
+									$('.js-progress-time').progress({
+										percent: parseInt(((currentTime / duration) * 100))
+									});
+								});
+							});
+						}, 1000);
+					} else {
+						clearInterval(interval);
+					}
 
-				 $(this).addClass('active').siblings().removeClass('active');
-				 });
 
-				 form.on('click', '.js-stop', function (event) {
-				 event.preventDefault();
-				 player.stopVideo();
+				});
 
-				 $(this).addClass('active').siblings().removeClass('active');
-				 });
+				form.on('click', '.js-play', function (event) {
+					event.preventDefault();
+					player.playVideo();
 
-				 form.on('click', '.js-mute', function (event) {
-				 event.preventDefault();
-				 player.mute = !player.isMuted();
+					$(this).addClass('active').siblings().removeClass('active');
+				});
 
-				 if (player.isMuted()) {
-				 $(this).find('.icon').removeClass('volume off');
-				 $(this).find('.icon').addClass('volume up');
-				 $('.js-volume').removeClass('disabled');
-				 } else {
-				 $(this).find('.icon').removeClass('volume up');
-				 $(this).find('.icon').addClass('volume off');
-				 $('.js-volume').addClass('disabled');
-				 }
-				 });
+				form.on('click', '.js-pause', function (event) {
+					event.preventDefault();
+					player.pauseVideo();
 
-				 $('.js-volume').progress({
-				 percent: player.volume
-				 });
+					$(this).addClass('active').siblings().removeClass('active');
+				});
 
-				 form.on('click', '.js-volume-minus', function (event) {
-				 event.preventDefault();
-				 if (player.volume === 0) {
-				 $('.js-volume').progress({
-				 percent: 0
-				 });
-				 return;
-				 }
+				form.on('click', '.js-stop', function (event) {
+					event.preventDefault();
+					player.stopVideo();
 
-				 player.volume -= 10;
+					$(this).addClass('active').siblings().removeClass('active');
+				});
 
-				 $('.js-volume').progress({
-				 percent: player.volume
-				 });
-				 });
+				form.on('click', '.js-mute', function (event) {
+					event.preventDefault();
 
-				 form.on('click', '.js-volume-plus', function (event) {
-				 event.preventDefault();
-				 if (player.volume === 100) {
-				 $('.js-volume').progress({
-				 percent: 100
-				 });
+					player.isMuted().then((isMuted) => {
+						player.mute = !isMuted;
 
-				 return;
-				 }
+						if (isMuted) {
+							$(this).find('.icon').removeClass('volume off');
+							$(this).find('.icon').addClass('volume up');
+							$('.js-volume').removeClass('disabled');
+						} else {
+							$(this).find('.icon').removeClass('volume up');
+							$(this).find('.icon').addClass('volume off');
+							$('.js-volume').addClass('disabled');
+						}
+					});
+				});
 
-				 player.volume += 10;
 
-				 $('.js-volume').progress({
-				 percent: player.volume
-				 });
-				 });
-				 */
+				player.volume.then((volume) => {
+					$('.js-volume').progress({
+						percent: volume * 100
+					});
+				});
+
+				form.on('click', '.js-volume-minus', function (event) {
+					event.preventDefault();
+
+					player.volume.then((volume) => {
+						if (volume === 0) {
+							$('.js-volume').progress({
+								percent: 0
+							});
+							return;
+						}
+
+						player.volume = volume - 0.1;
+
+						player.volume.then((volume) => {
+							$('.js-volume').progress({
+								percent: volume * 100
+							});
+						});
+					});
+				});
+
+				form.on('click', '.js-volume-plus', function (event) {
+					event.preventDefault();
+
+					player.volume.then((volume) => {
+						if (volume === 1) {
+							$('.js-volume').progress({
+								percent: 100
+							});
+							return;
+						}
+
+						player.volume = volume + 0.1;
+
+						player.volume.then((volume) => {
+							$('.js-volume').progress({
+								percent: volume * 100
+							});
+						});
+					});
+				});
 			});
 		});
 	}

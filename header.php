@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Modal</title>
-
     <link rel="stylesheet" href="./site/assets/css/style.css"/>
 </head>
 <body>
