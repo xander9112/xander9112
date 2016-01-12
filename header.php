@@ -47,4 +47,7 @@
     <a href="/SimpleForm" class="item<?= $_SERVER['REQUEST_URI'] == '/SimpleForm' ? ' active' : ''; ?>">
         SimpleForm
     </a>
+    <a href="/FormStyler" class="item<?= $_SERVER['REQUEST_URI'] == '/FormStyler' ? ' active' : ''; ?>">
+        FormStyler
+    </a>
 </div>

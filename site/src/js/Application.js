@@ -7,6 +7,7 @@ class Application {
 		this._initYouTubePlayerList();
 		this._initVimeoPlayer();
 		this._initSimpleSlider();
+		this._initFormStyles();
 		this._initSimpleForm();
 	}
 
@@ -510,6 +511,15 @@ class Application {
 
 				item.append(`<div class="index"><span>${index}</span></div>`);
 			});
+		});
+	}
+
+	_initFormStyles () {
+		"use strict";
+
+
+		$('.js-form-styles').each(function () {
+			$(this).find('input, textarea, select').styler();
 		});
 	}
 

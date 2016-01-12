@@ -2010,6 +2010,7 @@ var Application = (function () {
 		this._initYouTubePlayerList();
 		this._initVimeoPlayer();
 		this._initSimpleSlider();
+		this._initFormStyles();
 		this._initSimpleForm();
 	}
 
@@ -2514,6 +2515,15 @@ var Application = (function () {
 
 					item.append('<div class="index"><span>' + index + '</span></div>');
 				});
+			});
+		}
+	}, {
+		key: '_initFormStyles',
+		value: function _initFormStyles() {
+			"use strict";
+
+			$('.js-form-styles').each(function () {
+				$(this).find('input, textarea, select').styler();
 			});
 		}
 	}, {

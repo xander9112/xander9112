@@ -29,7 +29,7 @@ gulp.task('scripts.app', function () {
 gulp.task('scripts.vendor', function () {
 	return gulp.src([
 		'site/src/vendor/jquery-2.1.4.js',
-		//'site/src/vendor/bootstrap/js/bootstrap.js',
+		'site/src/vendor/jQueryFormStyler/jquery.formstyler.js',
 		'site/src/vendor/semantic/semantic.js',
 		'site/src/vendor/*.js'
 	])
