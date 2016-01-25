@@ -9,8 +9,6 @@ var production = require('../gulpfile');
 
 gulp.task('styles', function () {
 	return gulp.src([
-		//'site/src/vendor/bootstrap/css/bootstrap.css',
-		//'site/src/vendor/bootstrap/css/bootstrap-theme.css',
 		'site/src/vendor/semantic/semantic.css',
 		'site/src/vendor/jQueryFormStyler/jquery.formstyler.less',
 		'site/src/less/**/*'
