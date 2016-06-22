@@ -13,7 +13,7 @@
                     bioengineered.</p>
             </div>
             <div class="six wide right floated column">
-                <img src="assets/images/wireframe/white-image.png" class="ui large bordered rounded image">
+                <img src="./site/assets/images/white-image.png" class="ui large bordered rounded image">
             </div>
         </div>
         <div class="row">
@@ -37,7 +37,7 @@
                 <h3>"I shouldn't have gone with their competitor."</h3>
 
                 <p>
-                    <img src="assets/images/avatar/nan.jpg" class="ui avatar image"> <b>Nan</b> Chief Fun Officer
+                    <img src="./site/assets/images/nan.jpg" class="ui avatar image"> <b>Nan</b> Chief Fun Officer
                     Acme Toys
                 </p>
             </div>
