@@ -5,7 +5,8 @@ import {TextField} from "../../../_components/Fields";
 import {createStyles, Theme, WithStyles, withStyles} from "@material-ui/core";
 import Grid from "@material-ui/core/es/Grid/Grid";
 import Button from "@material-ui/core/es/Button/Button";
-import {doCreateUserWithEmailAndPassword} from "../../../_firebase";
+import {SignUpLink} from "../../SignUpPage/components/SignUpLink";
+import {doSignInWithEmailAndPassword} from "../../../_firebase";
 
 import * as routes from "../../../_constants";
 
@@ -18,10 +19,8 @@ const validate = (values: any) => {
     };
 
     const requiredFields = [
-        "username",
         "email",
-        "password",
-        "password_confirm"
+        "password"
     ];
 
     requiredFields.forEach(field => {
@@ -37,10 +36,6 @@ const validate = (values: any) => {
     }
 
 
-    if (values.password_confirm && values.password !== values.password_confirm) {
-        errors.password_confirm = "Password and Confirm Password must be an equal";
-    }
-
     return errors;
 };
 
@@ -55,12 +50,14 @@ interface IFormProps extends WithStyles<typeof styles> {
     onSubmit: (event: any) => void
 }
 
-class SignUpForm extends React.Component<IProps & InjectedFormProps<{}, IProps>, {}> {
+class SignInForm extends React.Component<IProps & InjectedFormProps<{}, IProps>, {}> {
     public render() {
         return (
             <Grid container spacing={24}>
                 <Grid item xs={4}>
                     <Form {...this.props} onSubmit={this.onSubmit} />
+
+                    <SignUpLink />
                 </Grid>
             </Grid>
         );
@@ -70,7 +67,7 @@ class SignUpForm extends React.Component<IProps & InjectedFormProps<{}, IProps>,
         const {history} = this.props;
 
         try {
-            await doCreateUserWithEmailAndPassword(email, password);
+            await doSignInWithEmailAndPassword(email, password);
 
             history.push(routes.HOME);
 
@@ -94,11 +91,6 @@ const FormComponent = (props: IFormProps & InjectedFormProps<{}, IProps>) => {
     return (
         <form onSubmit={handleSubmit(onSubmit)} className={classes.container}>
             <Field
-                name="username"
-                component={TextField}
-                label="Full Name"
-            />
-            <Field
                 name="email"
                 component={TextField}
                 label="Email Address"
@@ -109,26 +101,14 @@ const FormComponent = (props: IFormProps & InjectedFormProps<{}, IProps>) => {
                 type="password"
                 label="Password"
             />
-            <Field
-                name="password_confirm"
-                component={TextField}
-                type="password"
-                label="Confirm Password"
-            />
             <br />
-            {/*<ButtonBase*/}
-            {/*type="submit"*/}
-            {/*disabled={pristine || submitting}>*/}
-            {/**/}
-            {/*</ButtonBase>*/}
-
             <Button
                 color="primary"
                 variant="contained"
                 disabled={pristine || submitting}
                 onClick={handleSubmit(onSubmit)}
             >
-                Submit
+                Sign in
             </Button>
             {/*{error && <p>{error.message}</p>}*/}
         </form>
@@ -140,4 +120,4 @@ const Form = withStyles(styles, {withTheme: true})(FormComponent);
 export default reduxForm<{}, IProps>({
     form: "SignUpForm",
     validate
-})(SignUpForm);
+})(SignInForm);

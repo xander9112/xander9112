@@ -1,22 +1,42 @@
 import * as React from "react";
-import {Link} from "react-router-dom";
-import ListItem from "@material-ui/core/ListItem";
+// import {Link} from "react-router-dom";
+// import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+import SignOut from "../SignOut";
 import * as routes from "../../_constants";
+import {ListItemLink} from "../ListItemLink";
+import {AuthUserContext} from "../../_firebase/AuthUserContext";
+
+
+const NavigationAuth = () =>
+    <React.Fragment>
+        <ListItemLink to={routes.LANDING}>
+            <ListItemText>Landing</ListItemText>
+        </ListItemLink>
+        <ListItemLink to={routes.HOME}>
+            <ListItemText>Home</ListItemText>
+        </ListItemLink>
+        <ListItemLink to={routes.ACCOUNT}>
+            <ListItemText>Account</ListItemText>
+        </ListItemLink>
+        <ListItemLink to={routes.REMINDERS}>
+            <ListItemText>Reminders</ListItemText>
+        </ListItemLink>
+        <SignOut />
+    </React.Fragment>;
+
+const NavigationNonAuth = () =>
+    <React.Fragment>
+        <ListItemLink to={routes.LANDING}>
+            <ListItemText>Landing</ListItemText>
+        </ListItemLink>
+        <ListItemLink to={routes.SIGN_IN}>
+            <ListItemText>Sign In</ListItemText>
+        </ListItemLink>
+    </React.Fragment>;
 
 export default () => (
-    <React.Fragment>
-        <Link to={routes.SIGN_IN}>
-            <ListItem button><ListItemText>Sign In</ListItemText></ListItem>
-        </Link>
-        <Link to={routes.LANDING}>
-            <ListItem button><ListItemText>Landing</ListItemText></ListItem>
-        </Link>
-        <Link to={routes.HOME}>
-            <ListItem button><ListItemText>Home</ListItemText></ListItem>
-        </Link>
-        <Link to={routes.ACCOUNT}>
-            <ListItem button><ListItemText>Account</ListItemText></ListItem>
-        </Link>
-    </React.Fragment>
+    <AuthUserContext.Consumer>
+        {(authUser: any) => (authUser ? <NavigationAuth /> : <NavigationNonAuth />)}
+    </AuthUserContext.Consumer>
 );

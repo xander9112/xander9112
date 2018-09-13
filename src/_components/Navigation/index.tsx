@@ -18,7 +18,7 @@ const Index = (props: any) => {
             <AppBar position="absolute" className={classes.appBar}>
                 <Toolbar>
                     <Typography variant="title" color="inherit" noWrap>
-                        Clipped drawer
+                        FireBase
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -47,7 +47,7 @@ const drawerWidth = 240;
 const styles = (theme: Theme) => createStyles({
     root: {
         flexGrow: 1,
-        height: 430,
+        height: "100vh",
         zIndex: 1,
         overflow: "hidden",
         position: "relative",

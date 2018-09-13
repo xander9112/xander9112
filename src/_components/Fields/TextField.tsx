@@ -11,7 +11,7 @@ const renderTextField = ({input, label, meta: {touched, error}, ...custom}: any)
             {...custom}
         />
         {touched && error &&
-            <FormHelperText id="name-error-text">{error}</FormHelperText>
+            <FormHelperText error id="name-error-text">{error}</FormHelperText>
         }
     </FormControl>
 );
